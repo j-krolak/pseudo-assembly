@@ -6,11 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/src/style.css" />
     <title>Pseudo assembly</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
+    <h1>Pseudo assembly</h1>
     <div id="app">
-      <textarea id="code"></textarea>
-      <button id="run-btn">Run</button>
+      <div>
+        <div id="registers"></div>
+      </div>
+      <div id="code-editor">
+        <div id="code"></div>
+        <div>
+          <button id="run-btn">Run</button>
+          <button id="next-btn">Execute line by line</button>
+        </div>
+      </div>
+      <div>
+        <div id="memory"></div>
+      </div>
     </div>
     <script type="module" src="/src/main.ts"></script>
   </body>

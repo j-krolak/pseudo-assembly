@@ -1,3 +1,65 @@
 :root {
-  background-color: #1b1a1a;
+  background-color: #141516;
+  color: white;
+  font-family: 'Inter', sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+}
+
+h1 {
+  font-weight: 500;
+  text-align: center;
+}
+
+#registers {
+  font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  gap: 1rem;
+  flex-direction: column;
+  font-size: large;
+}
+
+.register {
+}
+
+#code-editor {
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+}
+
+#memory {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.byte-record {
+  display: flex;
+  gap: 1rem;
+}
+
+.current-memory {
+  background-color: #005f5a;
+}
+
+#app {
+  display: flex;
+  margin-top: 5rem;
+  gap: 2rem;
+  padding: 3rem;
+}
+
+#app > div {
+  flex: 1;
+  background-color: #282c34;
+  border-radius: 0.4rem;
+  overflow: hidden;
+  padding: 1rem;
+}
+
+#code {
+  font-size: larger;
+}
+
+.cm-editor {
+  min-height: calc(1.5rem * 10);
 }

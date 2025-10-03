@@ -27,12 +27,24 @@ const rrKeywords = ['AR', 'SR', 'MR', 'DR', 'CR'];
 // Register-memory instructions
 const rmKeywords = ['A', 'S', 'M', 'D', 'C', 'L', 'ST', 'LA'];
 
+type byteType = 'INSTRUCTION' | 'DATA';
+
+export type byte = {
+  val: number;
+  type: byteType;
+};
+
 const FLAGS = {
   CF: 0,
   PF: 2,
   ZF: 6,
   SF: 7,
   OF: 11,
+};
+
+type Statment = {
+  val: string;
+  byteSize: number;
 };
 
 type Label = {
@@ -55,16 +67,19 @@ class RuntimeError extends Error {
   }
 }
 class Interpreter {
-  statements: string[];
+  statements: Statment[];
   registers: Int32Array;
   eflags: number;
-  bytes: number[];
+  bytes: byte[];
   labels: Label[];
   currentLine: number;
   currentMemoryAddress: number;
   constructor(code: string) {
     this.registers = new Int32Array(16);
-    this.statements = [...code.split('\n')];
+    this.statements = [...code.split('\n')].map((val) => ({
+      val: val,
+      byteSize: 1,
+    }));
     this.labels = [];
     this.currentLine = 0;
     this.currentMemoryAddress = 0;
@@ -99,36 +114,44 @@ class Interpreter {
   }
 
   getNumberInParen(val: string): number {
-    const res = val.match(/\d+/);
+    const res = val.match(/-?\d+/);
     if (val.length < 1) {
       throw new PreprocessingError('there isnt number.');
     }
+
     return Number(res?.[0]);
   }
 
-  bytesToNumber(bytes: number[]): number {
-    const [d, c, b, a] = bytes;
-    const res = (a << 32) + (b << 16) + (c << 8) + d;
+  bytesToNumber(bytes: byte[]): number {
+    const [d, c, b, a] = [
+      bytes[0].val,
+      bytes[1].val,
+      bytes[2].val,
+      bytes[3].val,
+    ];
+    const res = (a << 24) | (b << 16) | (c << 8) | d;
     return res;
   }
 
   // Little-endia
-  numberToBytes(n: number): number[] {
-    const res: number[] = [];
-    res.push(n & 0xff);
-    res.push(n & (0xff << 8));
-    res.push(n & (0xff << 16));
-    res.push(n & (0xff << 24));
+  numberToBytes(n: number): byte[] {
+    const res: byte[] = [];
+    res.push({ val: n & 0xff, type: 'DATA' });
+    res.push({ val: (n >> 8) & 0xff, type: 'DATA' });
+    res.push({ val: (n >> 16) & 0xff, type: 'DATA' });
+    res.push({ val: (n >> 24) & 0xff, type: 'DATA' });
     return res;
   }
 
   preprocess() {
     while (!this.isAtEnd()) {
-      const tokens = this.splitStatment(this.statements[this.currentLine]);
+      const tokens = this.splitStatment(this.statements[this.currentLine].val);
       if (tokens.length === 0) {
         this.currentLine += 1;
         continue;
       }
+
+      const previousMemoryAddress = this.currentMemoryAddress;
 
       // Add label to environment
       if (tokens.length > 1 && keywords.includes(tokens[1])) {
@@ -176,7 +199,10 @@ class Interpreter {
             this.bytes = [...this.bytes, ...this.numberToBytes(number)];
             this.bytes = [
               ...this.bytes,
-              ...new Array(numberOfMemoryCells - 4).fill(0),
+              ...new Array(numberOfMemoryCells - 4).fill({
+                val: 0,
+                type: 'DATA',
+              }),
             ];
           } else if (args.length === 1) {
             const number = this.getNumberInParen(args[0]);
@@ -191,7 +217,10 @@ class Interpreter {
           }
           this.bytes = [
             ...this.bytes,
-            ...new Array(numberOfMemoryCells).fill(0),
+            ...new Array(numberOfMemoryCells).fill({
+              val: 0,
+              type: 'DATA',
+            }),
           ];
 
           this.currentMemoryAddress += numberOfMemoryCells;
@@ -199,10 +228,17 @@ class Interpreter {
         default:
           const instructionSize = this.getSizeOfInstruction(instruction);
           this.currentMemoryAddress += instructionSize;
-          this.bytes = [...this.bytes, ...new Array(instructionSize).fill(0)];
+          this.bytes = [
+            ...this.bytes,
+            ...new Array(instructionSize).fill({
+              val: 0,
+              type: 'INSTRUCTION',
+            }),
+          ];
           break;
       }
-
+      this.statements[this.currentLine].byteSize =
+        this.currentMemoryAddress - previousMemoryAddress;
       this.currentLine += 1;
     }
 
@@ -274,7 +310,8 @@ class Interpreter {
   }
 
   interpretNextLine() {
-    const tokens = this.splitStatment(this.statements[this.currentLine]);
+    if (this.isAtEnd()) return;
+    const tokens = this.splitStatment(this.statements[this.currentLine].val);
     if (tokens.length === 0) {
       this.currentLine += 1;
       return;
@@ -388,7 +425,7 @@ class Interpreter {
         `[Line ${this.currentLine}] Unrecognized instruction name "${instruction}".`,
       );
     }
-
+    this.currentMemoryAddress += this.statements[this.currentLine].byteSize;
     this.currentLine += 1;
   }
 }
