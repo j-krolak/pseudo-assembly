@@ -1,0 +1,395 @@
+const keywords = [
+  'A',
+  'AR',
+  'S',
+  'SR',
+  'M',
+  'MR',
+  'D',
+  'DR',
+  'C',
+  'CR',
+  'L',
+  'LR',
+  'ST',
+  'LA',
+  'J',
+  'JP',
+  'JZ',
+  'JN',
+  'DC',
+  'DS',
+];
+
+// Register-register instructions
+const rrKeywords = ['AR', 'SR', 'MR', 'DR', 'CR'];
+
+// Register-memory instructions
+const rmKeywords = ['A', 'S', 'M', 'D', 'C', 'L', 'ST', 'LA'];
+
+const FLAGS = {
+  CF: 0,
+  PF: 2,
+  ZF: 6,
+  SF: 7,
+  OF: 11,
+};
+
+type Label = {
+  label: string;
+  line: number;
+  address: number;
+};
+
+class PreprocessingError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PreprocessingError';
+  }
+}
+
+class RuntimeError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'RuntimeError';
+  }
+}
+class Interpreter {
+  statements: string[];
+  registers: Int32Array;
+  eflags: number;
+  bytes: number[];
+  labels: Label[];
+  currentLine: number;
+  currentMemoryAddress: number;
+  constructor(code: string) {
+    this.registers = new Int32Array(16);
+    this.statements = [...code.split('\n')];
+    this.labels = [];
+    this.currentLine = 0;
+    this.currentMemoryAddress = 0;
+    this.eflags = 0;
+    this.bytes = [];
+  }
+
+  isAtEnd() {
+    return this.statements.length <= this.currentLine;
+  }
+
+  interpret() {
+    this.preprocess();
+    while (!this.isAtEnd()) this.interpretNextLine();
+  }
+
+  splitStatment(stmt: string): string[] {
+    const tokens: string[] = [];
+    const rawTokens = stmt.split(',').join(' , ').split(' ');
+    rawTokens.forEach((rawToken) => {
+      const token = rawToken.trim();
+      if (token.length > 0) tokens.push(token);
+    });
+    return tokens;
+  }
+
+  isLabelDefined(label: string): boolean {
+    return (
+      this.labels.findIndex((currentLabel) => currentLabel.label == label) !==
+      -1
+    );
+  }
+
+  getNumberInParen(val: string): number {
+    const res = val.match(/\d+/);
+    if (val.length < 1) {
+      throw new PreprocessingError('there isnt number.');
+    }
+    return Number(res?.[0]);
+  }
+
+  bytesToNumber(bytes: number[]): number {
+    const [d, c, b, a] = bytes;
+    const res = (a << 32) + (b << 16) + (c << 8) + d;
+    return res;
+  }
+
+  // Little-endia
+  numberToBytes(n: number): number[] {
+    const res: number[] = [];
+    res.push(n & 0xff);
+    res.push(n & (0xff << 8));
+    res.push(n & (0xff << 16));
+    res.push(n & (0xff << 24));
+    return res;
+  }
+
+  preprocess() {
+    while (!this.isAtEnd()) {
+      const tokens = this.splitStatment(this.statements[this.currentLine]);
+      if (tokens.length === 0) {
+        this.currentLine += 1;
+        continue;
+      }
+
+      // Add label to environment
+      if (tokens.length > 1 && keywords.includes(tokens[1])) {
+        if (this.isLabelDefined(tokens[0])) {
+          throw new PreprocessingError(
+            `[Line ${this.currentLine}] Label "${tokens[0]}" is defined more than once.`,
+          );
+        }
+
+        if (!this.isAlphaNumeric(tokens[0])) {
+          throw new PreprocessingError(
+            `[Line ${this.currentLine}] Label "${tokens[0]}" name must be alpha numberic name.'`,
+          );
+        }
+
+        this.labels.push({
+          label: tokens[0],
+          line: this.currentLine,
+          address: this.currentMemoryAddress,
+        });
+      }
+
+      let currentIndex = 0;
+      let instruction = tokens[0];
+
+      currentIndex += 1;
+      if (tokens.length > 1 && keywords.includes(tokens[1])) {
+        instruction = tokens[1];
+        currentIndex += 1;
+      }
+
+      if (!keywords.includes(instruction)) {
+        throw new PreprocessingError(
+          `[Line ${this.currentLine}] Unrecognized instruction name "${instruction}".`,
+        );
+      }
+
+      const args = tokens[currentIndex].split('*');
+      switch (instruction) {
+        case 'DC':
+          if (args.length === 2) {
+            const numberOfMemoryCells = Number(args[0]) * 4;
+            const number = this.getNumberInParen(args[1]);
+            this.currentMemoryAddress += numberOfMemoryCells;
+            this.bytes = [...this.bytes, ...this.numberToBytes(number)];
+            this.bytes = [
+              ...this.bytes,
+              ...new Array(numberOfMemoryCells - 4).fill(0),
+            ];
+          } else if (args.length === 1) {
+            const number = this.getNumberInParen(args[0]);
+            this.bytes = [...this.bytes, ...this.numberToBytes(number)];
+            this.currentMemoryAddress += 4;
+          }
+          break;
+        case 'DS':
+          let numberOfMemoryCells = 4;
+          if (args.length === 2) {
+            numberOfMemoryCells = Number(args[0]) * 4;
+          }
+          this.bytes = [
+            ...this.bytes,
+            ...new Array(numberOfMemoryCells).fill(0),
+          ];
+
+          this.currentMemoryAddress += numberOfMemoryCells;
+          break;
+        default:
+          const instructionSize = this.getSizeOfInstruction(instruction);
+          this.currentMemoryAddress += instructionSize;
+          this.bytes = [...this.bytes, ...new Array(instructionSize).fill(0)];
+          break;
+      }
+
+      this.currentLine += 1;
+    }
+
+    this.currentLine = 0;
+    this.currentMemoryAddress = 0;
+  }
+
+  isAlphaNumeric(val: string): boolean {
+    for (let c in val.split('')) {
+      if (
+        !(
+          (c >= 'a' && c <= 'z') ||
+          (c >= 'A' && c <= 'Z') ||
+          (c >= '0' && c <= '9')
+        )
+      ) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  getSizeOfInstruction(instruction: string): number {
+    return this.isInstructionRR(instruction) ? 4 : 8;
+  }
+
+  getMemoryAddr(param: string): number {
+    if (/^\d+$/.test(param)) {
+      return Number(param);
+    }
+    if (/^0\(\d+\)$/.test(param)) {
+      return this.registers[Number(param.slice(2, -1))];
+    }
+
+    const label = this.labels.find((label) => label.label === param);
+
+    if (label === undefined) {
+      throw new RuntimeError(
+        `[Line ${this.currentLine}] There isn't defined label "${param}."`,
+      );
+    }
+
+    return label.address;
+  }
+
+  // Check if instruction is register-regitser
+  isInstructionRR(instruction: string): boolean {
+    return rrKeywords.includes(instruction);
+  }
+
+  // Check if instruction is register-regitser
+  isInstructionRM(instruction: string): boolean {
+    return rmKeywords.includes(instruction);
+  }
+  getNumberFromMemory(addr: number): number {
+    return this.bytesToNumber([
+      this.bytes[addr],
+      this.bytes[addr + 1],
+      this.bytes[addr + 2],
+      this.bytes[addr + 3],
+    ]);
+  }
+  setNumberInMemory(addr: number, num: number) {
+    const data = this.numberToBytes(num);
+    this.bytes[addr] = data[0];
+    this.bytes[addr + 1] = data[1];
+    this.bytes[addr + 2] = data[2];
+    this.bytes[addr + 3] = data[3];
+  }
+
+  interpretNextLine() {
+    const tokens = this.splitStatment(this.statements[this.currentLine]);
+    if (tokens.length === 0) {
+      this.currentLine += 1;
+      return;
+    }
+    let currentIndex: number = 0;
+    let instruction = tokens[0];
+
+    if (tokens.length > 1 && keywords.includes(tokens[1])) {
+      instruction = tokens[1];
+      currentIndex += 1;
+    }
+
+    if (keywords.includes(instruction)) {
+      currentIndex += 1;
+
+      // Register-register instructions
+      if (this.isInstructionRR(instruction)) {
+        if (tokens.length - currentIndex != 3) {
+          throw new RuntimeError(
+            `[Line ${this.currentLine}] To many argument for instruction "${instruction}" .`,
+          );
+        }
+        const r1 = Number(tokens[currentIndex]);
+        currentIndex += 1;
+        if (tokens[currentIndex] != ',') {
+          throw new RuntimeError(
+            `[Line ${this.currentLine}] Expected "," between arguments of instruction ${instruction}.`,
+          );
+        }
+        currentIndex += 1;
+        const r2 = Number(tokens[currentIndex]);
+
+        switch (instruction) {
+          case 'AR':
+            this.registers[r1] += this.registers[r2];
+            break;
+          case 'SR':
+            this.registers[r1] -= this.registers[r2];
+            break;
+          case 'MR':
+            this.registers[r1] *= this.registers[r2];
+            break;
+          case 'DR':
+            this.registers[r1] = Math.floor(
+              this.registers[r1] / this.registers[r2],
+            );
+            break;
+          case 'CR':
+            this.eflags &= ~FLAGS.ZF;
+            this.eflags |=
+              this.registers[r1] === this.registers[r2] ? FLAGS.ZF : 0;
+            break;
+          case 'LR':
+            this.registers[r1] = this.registers[r2];
+            break;
+        }
+      }
+
+      // Register-memory instructions
+      if (this.isInstructionRM(instruction)) {
+        if (tokens.length - currentIndex != 3) {
+          throw new RuntimeError(
+            `[Line ${this.currentLine}] To many argument for instruction "${instruction}" .`,
+          );
+        }
+        const r1 = Number(tokens[currentIndex]);
+        currentIndex += 1;
+        if (tokens[currentIndex] != ',') {
+          throw new RuntimeError(
+            `[Line ${this.currentLine}] Expected "," between arguments of instruction ${instruction}.`,
+          );
+        }
+        currentIndex += 1;
+        const addr = this.getMemoryAddr(tokens[currentIndex]);
+
+        switch (instruction) {
+          case 'A':
+            this.registers[r1] += this.getNumberFromMemory(addr);
+            break;
+          case 'S':
+            this.registers[r1] -= this.getNumberFromMemory(addr);
+            break;
+          case 'M':
+            this.registers[r1] *= this.getNumberFromMemory(addr);
+            break;
+          case 'D':
+            this.registers[r1] = Math.floor(
+              this.registers[r1] / this.getNumberFromMemory(addr),
+            );
+            break;
+          case 'C':
+            this.eflags &= ~FLAGS.ZF;
+            this.eflags |=
+              this.registers[r1] === this.getNumberFromMemory(addr)
+                ? FLAGS.ZF
+                : 0;
+            break;
+          case 'L':
+            this.registers[r1] = this.getNumberFromMemory(addr);
+            break;
+          case 'ST':
+            this.setNumberInMemory(addr, this.registers[r1]);
+            break;
+          case 'LA':
+            this.registers[r1] = addr;
+            break;
+        }
+      }
+    } else {
+      throw new RuntimeError(
+        `[Line ${this.currentLine}] Unrecognized instruction name "${instruction}".`,
+      );
+    }
+
+    this.currentLine += 1;
+  }
+}
+export { Interpreter };
