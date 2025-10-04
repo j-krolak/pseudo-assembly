@@ -10,7 +10,7 @@ import {
 import { Decoration, EditorView as View, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup, EditorView } from 'codemirror';
-import { oneDark } from '@codemirror/theme-one-dark';
+import { boysAndGirls } from 'thememirror';
 
 const runBtn = document.getElementById('run-btn');
 const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
@@ -67,14 +67,26 @@ const removeHighlight = (view: EditorView) => {
   });
 };
 
+// Create a custom theme that only changes the background
+const blackBackground = EditorView.theme(
+  {
+    '&': {
+      backgroundColor: '#000 !important',
+      color: '#ffffff',
+    },
+  },
+  { dark: true },
+);
+
 let state = EditorState.create({
   doc: 'ONE DC INTEGER(10)\nA 0, ONE',
   extensions: [
     keymap.of(defaultKeymap),
     basicSetup,
     editableCompartment.of([EditorView.editable.of(!executingLineByLine)]),
-    oneDark,
+    boysAndGirls,
     lineHighlightField,
+    blackBackground,
   ],
 });
 

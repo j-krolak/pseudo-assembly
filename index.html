@@ -12,27 +12,41 @@
       href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
       rel="stylesheet"
     />
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
   <body>
-    <h1>Pseudo assembly</h1>
-    <div id="app">
-      <div>
-        <div id="registers"></div>
-      </div>
-      <div id="code-editor">
-        <div id="code"></div>
-        <div>
-          <div id="errors"></div>
-          <div>
-            <button id="run-btn">Run</button>
-            <button id="next-btn">Execute line by line</button>
+    <nav class="fixed z-100 px-12 py-6">
+      <h1 class="text-xl font-mono">pseudo assembly</h1>
+    </nav>
+    <div
+      class="relative min-h-screen w-full bg-black flex justify-center flex-col px-12"
+    >
+      <div
+        class="z-0 absolute inset-0 [background-size:40px_40px] [background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
+      ></div>
+      <div
+        class="z-0 pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"
+      ></div>
+      <div id="app" class="relative z-10 flex xl:flex-row flex-col gap-4">
+        <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
+          <div id="registers"></div>
+        </div>
+        <div id="code-editor" class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]"">
+          <div id="code"></div>
+          <div class="flex gap-4 flex-col">
+            <div id="errors" class="font-mono text-red-500 "></div>
+            <div class="flex justify-end gap-2">
+              <button id="next-btn" class="font-mono px-2 py-1 border bg-black hover:bg-[#2e2e2e]">Execute line by line</button>
+              <button id="run-btn" class="font-mono px-2 py-1 border bg-black hover:bg-[#2e2e2e]">Run</button>
+            </div>
           </div>
         </div>
-      </div>
-      <div>
-        <div id="memory"></div>
+        <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]"">
+          <div id="memory"></div>
+        </div>
       </div>
     </div>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
