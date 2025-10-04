@@ -6,9 +6,6 @@
   font-style: normal;
 }
 
-body {
-}
-
 #registers {
   font-family: 'Courier New', Courier, monospace;
   display: flex;
@@ -32,12 +29,11 @@ body {
 }
 
 .byte-record > div {
-
-  padding: 0 0.5rem ;
+  padding: 0 0.5rem;
 }
 
 .current-memory {
-  background-color: #005f5a;
+  background-color: #44aa00ff;
 }
 
 #code {
@@ -50,7 +46,6 @@ body {
 
 #errors {
   border-radius: 0.1rem;
-  backgroud {
   outline: none !important;
   border: none;
 }

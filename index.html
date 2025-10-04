@@ -2,21 +2,15 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/pasm.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="/src/style.css" />
-    <title>Pseudo assembly</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap"
-      rel="stylesheet"
-    />
+    <title>pseudo assembly</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
   </head>
-  <body>
+  <body class="font-mono">
     <nav class="fixed z-100 px-12 py-6">
-      <h1 class="text-xl font-mono">pseudo assembly</h1>
+      <h1 class="text-xl">pseudo assembly</h1>
     </nav>
     <div
       class="relative min-h-screen w-full bg-black flex justify-center flex-col px-12"
@@ -31,17 +25,30 @@
         <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
           <div id="registers"></div>
         </div>
-        <div id="code-editor" class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]"">
+        <div
+          id="code-editor"
+          class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]"
+        >
           <div id="code"></div>
           <div class="flex gap-4 flex-col">
-            <div id="errors" class="font-mono text-red-500 "></div>
+            <div id="errors" class="text-red-500"></div>
             <div class="flex justify-end gap-2">
-              <button id="next-btn" class="font-mono px-2 py-1 border bg-black hover:bg-[#2e2e2e]">Execute line by line</button>
-              <button id="run-btn" class="font-mono px-2 py-1 border bg-black hover:bg-[#2e2e2e]">Run</button>
+              <button
+                id="next-btn"
+                class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white active:bg-"
+              >
+                Execute line by line
+              </button>
+              <button
+                id="run-btn"
+                class="px-2 py-1 border bg-black hover:bg-white hover:text-black"
+              >
+                Run
+              </button>
             </div>
           </div>
         </div>
-        <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]"">
+        <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
           <div id="memory"></div>
         </div>
       </div>

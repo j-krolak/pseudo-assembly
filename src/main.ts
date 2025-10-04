@@ -49,7 +49,7 @@ const lineHighlightField = StateField.define({
 });
 
 const lineHighlightMark = Decoration.line({
-  attributes: { style: 'background-color: #005F5A' },
+  attributes: { style: 'background-color: #44aa00ff' },
 });
 
 const highlightLine = (view: EditorView, lineNumber: number) => {
@@ -73,6 +73,9 @@ const blackBackground = EditorView.theme(
     '&': {
       backgroundColor: '#000 !important',
       color: '#ffffff',
+    },
+    '.cm-cursor': {
+      borderLeftColor: '#44aa00ff !important',
     },
   },
   { dark: true },
@@ -159,6 +162,7 @@ nextBtn?.addEventListener('click', () => {
 
 runBtn?.addEventListener('click', () => {
   errorsDiv.innerHTML = '';
+  resetInterpreter();
   const code = view.state.doc.toString();
   interpreter = new Interpreter(code);
   try {
