@@ -130,7 +130,7 @@ class Interpreter {
     return res;
   }
 
-  // Little-endia
+  // Little-endian
   numberToBytes(n: number): byte[] {
     const res: byte[] = [];
     res.push({ val: n & 0xff, type: 'DATA' });
