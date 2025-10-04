@@ -316,7 +316,7 @@ class Interpreter {
     let stmtAddr = 0;
 
     for (let i = 0; i < this.statements.length; i++) {
-      if (addr === stmtAddr) {
+      if (this.statements[i].byteSize > 0 && addr === stmtAddr) {
         return i;
       }
 
@@ -342,11 +342,9 @@ class Interpreter {
   }
 
   updateEflags(num: number) {
-    console.log(num);
     this.eflags = 0;
     this.eflags |= num === 0 ? 1 << FLAGS.ZF : 0;
     this.eflags |= num < 0 ? 1 << FLAGS.SF : 0;
-    console.log(this.eflags.toString(2));
   }
 
   interpretNextLine() {
@@ -499,19 +497,23 @@ class Interpreter {
             if (!(this.eflags & (1 << FLAGS.SF))) {
               this.currentLine = statmentLine;
               this.currentMemoryAddress = addr;
+              return;
             }
             break;
           case 'JN':
             if (this.eflags & (1 << FLAGS.SF)) {
               this.currentLine = statmentLine;
               this.currentMemoryAddress = addr;
+              return;
             }
             break;
           case 'JZ':
             if (this.eflags & (1 << FLAGS.ZF)) {
               this.currentLine = statmentLine;
               this.currentMemoryAddress = addr;
+              return;
             }
+            break;
         }
       }
     } else {
