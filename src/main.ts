@@ -77,6 +77,10 @@ const blackBackground = EditorView.theme(
     '.cm-cursor': {
       borderLeftColor: '#44aa00ff !important',
     },
+    '&.cm-focused': {
+      outline: 'none',
+      border: 'none',
+    },
   },
   { dark: true },
 );
