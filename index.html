@@ -6,15 +6,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pseudo assembly</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script type="module" crossorigin src="/pseudo-assembly/assets/index-MCfuRA_n.js"></script>
+    <script type="module" crossorigin src="/pseudo-assembly/assets/index-DNy-gsvO.js"></script>
     <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/index-2gIJW4rW.css">
   </head>
   <body class="font-mono">
-    <nav class="fixed z-100 px-12 py-6">
+    <nav
+      class="absolute top-0 right-0 left-0 z-100 px-12 py-6 flex flex-row justify-between items-center"
+    >
       <h1 class="text-xl">pseudo assembly</h1>
+      <div>
+        <a href="https://github.com/j-krolak/pseudo-assembly">
+          <img
+            src="/pseudo-assembly/github-mark-white.svg"
+            alt="GitHub"
+            width="32"
+            height="32"
+          />
+        </a>
+      </div>
     </nav>
     <div
-      class="relative min-h-screen w-full bg-black flex justify-center flex-col px-12"
+      class="relative min-h-screen w-full bg-black flex justify-center flex-col px-12 py-24"
     >
       <div
         class="z-0 absolute inset-0 [background-size:40px_40px] [background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
@@ -22,6 +34,7 @@
       <div
         class="z-0 pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"
       ></div>
+
       <div id="app" class="relative z-10 flex xl:flex-row flex-col gap-4">
         <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
           <div id="registers"></div>
