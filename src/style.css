@@ -63,3 +63,9 @@ h1 {
 .cm-editor {
   min-height: calc(1.5rem * 10);
 }
+
+#errors {
+  border-radius: 0.1rem;
+  background-color: #141516;
+  padding: 1rem 0.5rem;
+}

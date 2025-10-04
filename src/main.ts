@@ -1,5 +1,5 @@
-import { Interpreter } from './interpreter';
-import type { byte } from './interpreter';
+import { Interpreter, PreprocessingError } from './interpreter';
+import { RuntimeError, type byte } from './interpreter';
 
 import {
   Compartment,
@@ -13,10 +13,11 @@ import { basicSetup, EditorView } from 'codemirror';
 import { oneDark } from '@codemirror/theme-one-dark';
 
 const runBtn = document.getElementById('run-btn');
-const nextBtn = document.getElementById('next-btn');
+const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
 const registersDiv = document.getElementById('registers');
 const memoryDiv = document.getElementById('memory');
 const codeDiv = document.getElementById('code') as Element;
+const errorsDiv = document.getElementById('errors') as HTMLDivElement;
 
 // CodeMirror
 let executingLineByLine = false;
@@ -84,43 +85,80 @@ let view = new View({
 
 let interpreter = new Interpreter(view.state.doc.toString());
 
+const resetInterpreter = () => {
+  interpreter.currentLine = 0;
+  executingLineByLine = false;
+  view.dispatch({
+    effects: editableCompartment.reconfigure([EditorView.editable.of(true)]),
+  });
+  removeHighlight(view);
+
+  nextBtn.innerHTML = 'Execute line by line';
+};
+
 nextBtn?.addEventListener('click', () => {
+  errorsDiv.innerHTML = '';
   if (!executingLineByLine) {
-    highlightLine(view, interpreter.currentLine + 1);
-    const code = view.state.doc.toString();
-    interpreter = new Interpreter(code);
-    interpreter.preprocess();
+    try {
+      const code = view.state.doc.toString();
+      interpreter = new Interpreter(code);
+      highlightLine(view, interpreter.currentLine + 1);
+      interpreter.preprocess();
+      executingLineByLine = true;
+      view.dispatch({
+        effects: editableCompartment.reconfigure([
+          EditorView.editable.of(false),
+        ]),
+      });
+      nextBtn.innerHTML = 'Next line';
 
-    executingLineByLine = true;
-    view.dispatch({
-      effects: editableCompartment.reconfigure([EditorView.editable.of(false)]),
-    });
-    nextBtn.innerHTML = 'Next line';
+      displayState();
+    } catch (error) {
+      if (
+        error instanceof RuntimeError ||
+        error instanceof PreprocessingError
+      ) {
+        errorsDiv.innerHTML = error.message;
+      } else {
+        console.error(error);
+      }
+      resetInterpreter();
+    }
 
-    displayState();
     return;
   }
 
-  interpreter.interpretNextLine();
-  highlightLine(view, interpreter.currentLine + 1);
-  displayState();
+  try {
+    interpreter.interpretNextLine();
+    highlightLine(view, interpreter.currentLine + 1);
+    displayState();
+  } catch (error) {
+    if (error instanceof RuntimeError || error instanceof PreprocessingError) {
+      errorsDiv.innerHTML = error.message;
+    } else {
+      console.error(error);
+    }
+    resetInterpreter();
+  }
   if (interpreter.isAtEnd()) {
-    interpreter.currentLine = 0;
-    executingLineByLine = false;
-    view.dispatch({
-      effects: editableCompartment.reconfigure([EditorView.editable.of(true)]),
-    });
-    removeHighlight(view);
-
-    nextBtn.innerHTML = 'Execute line by line';
+    resetInterpreter();
   }
 });
 
 runBtn?.addEventListener('click', () => {
+  errorsDiv.innerHTML = '';
   const code = view.state.doc.toString();
   interpreter = new Interpreter(code);
-  interpreter.interpret();
-  displayState();
+  try {
+    interpreter.interpret();
+    displayState();
+  } catch (error) {
+    if (error instanceof RuntimeError || error instanceof PreprocessingError) {
+      errorsDiv.innerHTML = error.message;
+    } else {
+      console.error(error);
+    }
+  }
 });
 
 const displayState = () => {
@@ -155,7 +193,7 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
   for (let i = 0; i < bytes.length; i += 4) {
     const record = document.createElement('div');
     record.className = 'byte-record';
-    record.innerHTML = `0x${i.toString(16).padStart(16, '0')}`;
+    record.innerHTML = `0x${i.toString(16).padStart(8, '0')}: `;
     for (let j = i; j < i + 4; j += 1) {
       const byte = bytes[j];
       const byteHTML = document.createElement('div');
