@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/pseudo-assembly/pasm.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pseudo assembly</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-2gIJW4rW.css">
+  </head>
+  <body class="font-mono">
+    <nav
+      class="absolute top-0 right-0 left-0 z-100 px-12 py-6 flex flex-row justify-between items-center"
+    >
+      <a href="/pseudo-assembly/">
+        <h1 class="text-xl">pseudo assembly</h1>
+      </a>
+      <div class="flex items-center gap-4 text-xl">
+        <a href="/pseudo-assembly/docs">docs</a>
+        <a href="https://github.com/j-krolak/pseudo-assembly">
+          <img
+            src="/pseudo-assembly/github-mark-white.svg"
+            alt="GitHub"
+            width="20"
+            height="20"
+          />
+        </a>
+      </div>
+    </nav>
+    <div class="relative min-h-screen w-full bg-black px-12 py-24">
+      <div
+        class="z-0 absolute inset-0 [background-size:40px_40px] [background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
+      ></div>
+      <div
+        class="z-0 pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"
+      ></div>
+      <div
+        class="relative z-10 bg-black flex-1 p-6 border-2 border-[#2E2E2E] space-y-8"
+      >
+        <section>
+          <h2
+            class="text-3xl font-bold mb-6 text-white border-b border-[#2E2E2E] pb-2"
+          >
+            Pseudo Assembly Language Documentation
+          </h2>
+          <div class="bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded">
+            <p class="text-lg mb-4 text-gray-300">
+              This pseudo-assembly language and interpreter were created based
+              on lectures from the
+              <strong class="text-white">University of Warsaw</strong>. The
+              instruction set provides a simplified assembly-like environment
+              for learning fundamental computer architecture concepts.
+            </p>
+            <p class="text-gray-400">
+              The language includes register-memory operations,
+              register-register operations, conditional jumps, and data
+              declaration instructions, all implemented with a little-endian
+              memory model.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <h2
+            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+          >
+            Register-Memory Instructions
+          </h2>
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-[#2E2E2E]">
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Instruction
+                </th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Syntax</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Example</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Description
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">A</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  A &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  A 1, LABEL
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Add memory value to register.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">S</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  S &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">S 2, 100</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Subtract memory value from register.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">M</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  M &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  M 3, VALUE
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Multiply register by memory value.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">D</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  D &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">D 1, 0(2)</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Integer divide register by memory value.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">C</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  C &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">C 5, END</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Compare register with memory value.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">L</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  L &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">L 0, DATA</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Load memory value into register.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">ST</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  ST &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  ST 4, RESULT
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Store register value to memory.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">LA</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  LA &lt;reg&gt;, &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  LA 6, ARRAY
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Load address into register.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Register-Register Instructions -->
+        <section>
+          <h2
+            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+          >
+            Register-Register Instructions
+          </h2>
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-[#2E2E2E]">
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Instruction
+                </th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Syntax</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Example</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Description
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">AR</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  AR &lt;reg1&gt;, &lt;reg2&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">AR 1, 2</td>
+                <td class="p-3 border border-[#2E2E2E]">Add reg2 to reg1.</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">SR</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  SR &lt;reg1&gt;, &lt;reg2&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">SR 3, 1</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Subtract reg2 from reg1.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">MR</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  MR &lt;reg1&gt;, &lt;reg2&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">MR 0, 4</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Multiply reg1 by reg2.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">DR</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DR &lt;reg1&gt;, &lt;reg2&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">DR 5, 2</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Integer divide reg1 by reg2.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">CR</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  CR &lt;reg1&gt;, &lt;reg2&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">CR 1, 0</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Compare reg1 with reg2.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">LR</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  LR &lt;reg1&gt;, &lt;reg2&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">LR 3, 7</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Load reg2 value into reg1.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Jump Instructions -->
+        <section>
+          <h2
+            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+          >
+            Jump Instructions
+          </h2>
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-[#2E2E2E]">
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Instruction
+                </th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Syntax</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Example</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Description
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">J</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  J &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">J LOOP</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Unconditional jump to address.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">JP</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  JP &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  JP POSITIVE
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">Jump if positive</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">JN</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  JN &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  JN NEGATIVE
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">Jump if negative</td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">JZ</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  JZ &lt;addr&gt;
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">JZ ZERO</td>
+                <td class="p-3 border border-[#2E2E2E]">Jump if zero</td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Data Declaration Instructions -->
+        <section>
+          <h2
+            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+          >
+            Data Declaration Instructions
+          </h2>
+          <table class="w-full border-collapse">
+            <thead>
+              <tr class="bg-[#2E2E2E]">
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Instruction
+                </th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Syntax</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">Example</th>
+                <th class="text-center p-3 border border-[#2E2E2E]">
+                  Description
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">DC</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DC INTEGER(&lt;value&gt;)
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">DC 42</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Define constant - allocates 4 bytes with initial value.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">DC</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DC &lt;count&gt;*INTEGER(&lt;value&gt;)
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">DC 5*10</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Define multiple constants - allocates count*4 bytes, first
+                  initialized to value.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">DS</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DS INTEGER
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DS INTEGER
+                </td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Define storage - allocates 4 bytes initialized to zero.
+                </td>
+              </tr>
+              <tr>
+                <td class="p-3 border border-[#2E2E2E] font-bold">DS</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DS &lt;count&gt;*INTEGER
+                </td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">DS 10</td>
+                <td class="p-3 border border-[#2E2E2E]">
+                  Define storage - allocates count*4 bytes initialized to zero.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </section>
+
+        <!-- Addressing Modes -->
+        <section>
+          <h2
+            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+          >
+            Addressing Modes
+          </h2>
+          <div class="bg-[#1A1A1A] p-4 border border-[#2E2E2E]">
+            <h3 class="text-lg font-bold mb-3">Memory Address Formats:</h3>
+            <ul class="space-y-2 ml-4">
+              <li>
+                <span class="font-mono">LABEL</span> - Direct label reference
+              </li>
+              <li>
+                <span class="font-mono">123</span> - Direct numeric address
+              </li>
+              <li>
+                <span class="font-mono">0(5)</span> - Indirect addressing using
+                register 5 as pointer
+              </li>
+            </ul>
+
+            <h3 class="text-lg font-bold mb-3 mt-6">Flags:</h3>
+            <ul class="space-y-2 ml-4">
+              <li>
+                <span class="font-mono">ZF (bit 6)</span> - Zero Flag: Set when
+                result equals zero
+              </li>
+              <li>
+                <span class="font-mono">SF (bit 7)</span> - Sign Flag: Set when
+                result is negative
+              </li>
+            </ul>
+
+            <h3 class="text-lg font-bold mb-3 mt-6">Registers:</h3>
+            <p class="ml-4">
+              16 general-purpose registers numbered 0-15, each storing 32-bit
+              signed integers.
+            </p>
+
+            <h3 class="text-lg font-bold mb-3 mt-6">Memory Layout:</h3>
+            <p class="ml-4">
+              Little-endian byte ordering, 4-byte (32-bit) words, with data and
+              instruction segments.
+            </p>
+          </div>
+        </section>
+      </div>
+    </div>
+  </body>
+</html>
