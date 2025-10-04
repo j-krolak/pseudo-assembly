@@ -20,7 +20,6 @@ const codeDiv = document.getElementById('code') as Element;
 
 // CodeMirror
 let executingLineByLine = false;
-let currentLine = 0;
 const editableCompartment = new Compartment();
 
 const addLineHighlight = StateEffect.define();
@@ -83,14 +82,14 @@ let view = new View({
   parent: codeDiv,
 });
 
-let interprater = new Interpreter(view.state.doc.toString());
+let interpreter = new Interpreter(view.state.doc.toString());
 
 nextBtn?.addEventListener('click', () => {
   if (!executingLineByLine) {
-    highlightLine(view, currentLine + 1);
+    highlightLine(view, interpreter.currentLine + 1);
     const code = view.state.doc.toString();
-    interprater = new Interpreter(code);
-    interprater.preprocess();
+    interpreter = new Interpreter(code);
+    interpreter.preprocess();
 
     executingLineByLine = true;
     view.dispatch({
@@ -101,12 +100,12 @@ nextBtn?.addEventListener('click', () => {
     displayState();
     return;
   }
-  currentLine += 1;
-  highlightLine(view, currentLine + 1);
-  interprater.interpretNextLine();
+
+  interpreter.interpretNextLine();
+  highlightLine(view, interpreter.currentLine + 1);
   displayState();
-  if (interprater.isAtEnd()) {
-    currentLine = 0;
+  if (interpreter.isAtEnd()) {
+    interpreter.currentLine = 0;
     executingLineByLine = false;
     view.dispatch({
       effects: editableCompartment.reconfigure([EditorView.editable.of(true)]),
@@ -119,15 +118,15 @@ nextBtn?.addEventListener('click', () => {
 
 runBtn?.addEventListener('click', () => {
   const code = view.state.doc.toString();
-  interprater = new Interpreter(code);
-  interprater.interpret();
+  interpreter = new Interpreter(code);
+  interpreter.interpret();
   displayState();
 });
 
 const displayState = () => {
-  registersDiv?.replaceChildren(...createRegistersNodes(interprater.registers));
+  registersDiv?.replaceChildren(...createRegistersNodes(interpreter.registers));
 
-  memoryDiv?.replaceChildren(...createMemoryDiv(interprater.bytes));
+  memoryDiv?.replaceChildren(...createMemoryDiv(interpreter.bytes));
 };
 
 const createRegistersNodes = (registers: Int32Array): Node[] => {
@@ -156,15 +155,16 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
   for (let i = 0; i < bytes.length; i += 4) {
     const record = document.createElement('div');
     record.className = 'byte-record';
+    record.innerHTML = `0x${i.toString(16).padStart(16, '0')}`;
     for (let j = i; j < i + 4; j += 1) {
       const byte = bytes[j];
       const byteHTML = document.createElement('div');
       if (
         executingLineByLine &&
-        j >= interprater.currentMemoryAddress &&
+        j >= interpreter.currentMemoryAddress &&
         j <
-          interprater.currentMemoryAddress +
-            interprater.statements[currentLine].byteSize
+          interpreter.currentMemoryAddress +
+            interpreter.statements[interpreter.currentLine].byteSize
       )
         byteHTML.className = 'current-memory';
       byteHTML.innerHTML =

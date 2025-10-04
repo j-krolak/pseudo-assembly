@@ -35,11 +35,8 @@ export type byte = {
 };
 
 const FLAGS = {
-  CF: 0,
-  PF: 2,
   ZF: 6,
   SF: 7,
-  OF: 11,
 };
 
 type Statment = {
@@ -309,6 +306,41 @@ class Interpreter {
     this.bytes[addr + 3] = data[3];
   }
 
+  getStatmentLine(addr: number): number {
+    let stmtAddr = 0;
+
+    for (let i = 0; i < this.statements.length; i++) {
+      if (addr === stmtAddr) {
+        return i;
+      }
+
+      if (addr < stmtAddr) {
+        throw new RuntimeError(
+          `[Line ${
+            this.currentLine
+          }] InvalidJumpTarget - attempted to jump to address 0x${addr
+            .toString(16)
+            .padStart(32, '0')}, which is not executable.`,
+        );
+      }
+
+      stmtAddr += this.statements[i].byteSize;
+    }
+    throw new RuntimeError(
+      `[Line ${
+        this.currentLine
+      }] InvalidJumpTarget - attempted to jump to address 0x${addr
+        .toString(16)
+        .padStart(32, '0')}, which is not executable.`,
+    );
+  }
+
+  updateEflags(num: number) {
+    this.eflags ^= (1 << FLAGS.ZF) | (1 << FLAGS.SF);
+    this.eflags |= num === 0 ? 1 << FLAGS.ZF : 0;
+    this.eflags |= num < 0 ? 1 << FLAGS.SF : 0;
+  }
+
   interpretNextLine() {
     if (this.isAtEnd()) return;
     const tokens = this.splitStatment(this.statements[this.currentLine].val);
@@ -347,25 +379,28 @@ class Interpreter {
         switch (instruction) {
           case 'AR':
             this.registers[r1] += this.registers[r2];
+            this.updateEflags(this.registers[r1]);
             break;
           case 'SR':
             this.registers[r1] -= this.registers[r2];
+            this.updateEflags(this.registers[r1]);
             break;
           case 'MR':
             this.registers[r1] *= this.registers[r2];
+            this.updateEflags(this.registers[r1]);
             break;
           case 'DR':
             this.registers[r1] = Math.floor(
               this.registers[r1] / this.registers[r2],
             );
+            this.updateEflags(this.registers[r1]);
             break;
           case 'CR':
-            this.eflags &= ~FLAGS.ZF;
-            this.eflags |=
-              this.registers[r1] === this.registers[r2] ? FLAGS.ZF : 0;
+            this.updateEflags(this.registers[r1] - this.registers[r2]);
             break;
           case 'LR':
             this.registers[r1] = this.registers[r2];
+            this.updateEflags(this.registers[r1]);
             break;
         }
       }
@@ -386,38 +421,79 @@ class Interpreter {
         }
         currentIndex += 1;
         const addr = this.getMemoryAddr(tokens[currentIndex]);
-
         switch (instruction) {
           case 'A':
             this.registers[r1] += this.getNumberFromMemory(addr);
+            this.updateEflags(this.registers[r1]);
             break;
           case 'S':
             this.registers[r1] -= this.getNumberFromMemory(addr);
+            this.updateEflags(this.registers[r1]);
             break;
           case 'M':
             this.registers[r1] *= this.getNumberFromMemory(addr);
+            this.updateEflags(this.registers[r1]);
             break;
           case 'D':
             this.registers[r1] = Math.floor(
               this.registers[r1] / this.getNumberFromMemory(addr),
             );
+            this.updateEflags(this.registers[r1]);
             break;
           case 'C':
-            this.eflags &= ~FLAGS.ZF;
-            this.eflags |=
-              this.registers[r1] === this.getNumberFromMemory(addr)
-                ? FLAGS.ZF
-                : 0;
+            this.updateEflags(
+              this.registers[r1] - this.getNumberFromMemory(addr),
+            );
+            this.eflags ^= (1 << FLAGS.ZF) | (1 << FLAGS.SF);
+            this.eflags |= this.registers[r1] === 0 ? 1 << FLAGS.ZF : 0;
+            this.eflags |= this.registers[r1] < 0 ? 1 << FLAGS.SF : 0;
+
             break;
           case 'L':
             this.registers[r1] = this.getNumberFromMemory(addr);
+            this.updateEflags(this.registers[r1]);
             break;
           case 'ST':
             this.setNumberInMemory(addr, this.registers[r1]);
+            this.updateEflags(this.registers[r1]);
             break;
           case 'LA':
             this.registers[r1] = addr;
+            this.updateEflags(this.registers[r1]);
             break;
+        }
+      }
+
+      if (instruction.length > 0 && instruction[0] === 'J') {
+        if (tokens.length - currentIndex != 1) {
+          throw new RuntimeError(
+            `[Line ${this.currentLine}] Instruction "${instruction}" accept only one argument "${instruction} <memmory address>".`,
+          );
+        }
+        const addr = this.getMemoryAddr(tokens[currentIndex]);
+        const statmentLine = this.getStatmentLine(addr);
+        switch (instruction) {
+          case 'J':
+            this.currentLine = statmentLine;
+            this.currentMemoryAddress = addr;
+            return;
+          case 'JP':
+            if (!(this.eflags & (1 << FLAGS.SF))) {
+              this.currentLine = statmentLine;
+              this.currentMemoryAddress = addr;
+            }
+            break;
+          case 'JN':
+            if (this.eflags & (1 << FLAGS.SF)) {
+              this.currentLine = statmentLine;
+              this.currentMemoryAddress = addr;
+            }
+            break;
+          case 'JZ':
+            if (this.eflags & (1 << FLAGS.ZF)) {
+              this.currentLine = statmentLine;
+              this.currentMemoryAddress = addr;
+            }
         }
       }
     } else {
