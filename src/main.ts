@@ -218,7 +218,8 @@ const createRegistersNodes = (registers: Int32Array): Node[] => {
     registerHTML.className = 'register';
     const registerName = 'R' + i.toString();
     registerData.innerHTML =
-      registerName.padStart(4, '\t') +
+      registerName +
+      (i < 10 ? '&nbsp;' : '') +
       ' 0b' +
       (register >>> 0).toString(2).padStart(32, '0') +
       ' ' +
@@ -235,10 +236,15 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
   for (let i = 0; i < bytes.length; i += 4) {
     const record = document.createElement('div');
     record.className = 'byte-record';
-    record.innerHTML = `0x${i.toString(16).padStart(8, '0')}: `;
+    record.innerHTML = `0x${i.toString(16).padStart(4, '0')}: `;
     for (let j = i; j < i + 4; j += 1) {
-      const byte = bytes[j];
       const byteHTML = document.createElement('div');
+      if (j >= interpreter.bytes.length) {
+        byteHTML.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+        record.appendChild(byteHTML);
+        continue;
+      }
+
       if (
         executingLineByLine &&
         j >= interpreter.currentMemoryAddress &&
@@ -249,10 +255,13 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
       ) {
         byteHTML.className = 'current-memory';
       }
+
+      const byte = bytes[j];
       byteHTML.innerHTML =
         byte.type === 'DATA'
           ? byte.val.toString(2).padStart(8, '0')
           : 'xxxxxxxx';
+
       record.appendChild(byteHTML);
     }
     const numRepresntation =

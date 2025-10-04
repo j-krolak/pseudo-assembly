@@ -265,7 +265,7 @@ class Interpreter {
   }
 
   getSizeOfInstruction(instruction: string): number {
-    return this.isInstructionRR(instruction) ? 4 : 8;
+    return this.isInstructionRR(instruction) ? 2 : 4;
   }
 
   getMemoryAddr(param: string): number {
