@@ -22,7 +22,7 @@ export const keywords = [
 ];
 
 // Register-register instructions
-const rrKeywords = ['AR', 'SR', 'MR', 'DR', 'CR'];
+const rrKeywords = ['AR', 'SR', 'MR', 'DR', 'CR', 'LR'];
 
 // Register-memory instructions
 const rmKeywords = ['A', 'S', 'M', 'D', 'C', 'L', 'ST', 'LA'];
@@ -342,9 +342,11 @@ class Interpreter {
   }
 
   updateEflags(num: number) {
-    this.eflags ^= (1 << FLAGS.ZF) | (1 << FLAGS.SF);
+    console.log(num);
+    this.eflags = 0;
     this.eflags |= num === 0 ? 1 << FLAGS.ZF : 0;
     this.eflags |= num < 0 ? 1 << FLAGS.SF : 0;
+    console.log(this.eflags.toString(2));
   }
 
   interpretNextLine() {

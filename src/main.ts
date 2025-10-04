@@ -86,7 +86,29 @@ const blackBackground = EditorView.theme(
 );
 
 let state = EditorState.create({
-  doc: 'ONE DC INTEGER(10)\nA 0, ONE',
+  doc: `ZERO DC INTEGER(0)
+A DC INTEGER(7)
+B DC INTEGER(3)
+RES DS INTEGER
+
+L 0, A
+L 1, B
+
+START SR 0, 1
+CR 0, 1
+JZ END
+
+L 3, ZERO
+AR 3, 0
+SR 3, 1
+
+JP START
+LR 3, 0
+LR 0, 1
+LR 1, 3
+J START
+
+END ST 0, RES `,
   extensions: [
     keymap.of(defaultKeymap),
     basicSetup,
