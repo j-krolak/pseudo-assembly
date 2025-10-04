@@ -75,7 +75,7 @@ class Interpreter {
     this.registers = new Int32Array(16);
     this.statements = [...code.split('\n')].map((val) => ({
       val: val,
-      byteSize: 1,
+      byteSize: 0,
     }));
     this.labels = [];
     this.currentLine = 0;

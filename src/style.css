@@ -1,9 +1,6 @@
 :root {
-  background-color: #141516;
+  background-color: #000;
   color: white;
-  font-family: 'Inter', sans-serif;
-  font-optical-sizing: auto;
-  font-style: normal;
 }
 
 #registers {
@@ -30,6 +27,10 @@
 
 .byte-record > div {
   padding: 0 0.5rem;
+}
+
+.rep-data {
+  color: #44aa00ff;
 }
 
 .current-memory {

@@ -222,15 +222,30 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
         j >= interpreter.currentMemoryAddress &&
         j <
           interpreter.currentMemoryAddress +
-            interpreter.statements[interpreter.currentLine].byteSize
-      )
+            interpreter.statements[interpreter.currentLine].byteSize &&
+        interpreter.statements[interpreter.currentLine].byteSize > 0
+      ) {
         byteHTML.className = 'current-memory';
+      }
       byteHTML.innerHTML =
         byte.type === 'DATA'
           ? byte.val.toString(2).padStart(8, '0')
           : 'xxxxxxxx';
       record.appendChild(byteHTML);
     }
+    const numRepresntation =
+      bytes[i].type === 'DATA'
+        ? interpreter.bytesToNumber([
+            bytes[i],
+            bytes[i + 1],
+            bytes[i + 2],
+            bytes[i + 3],
+          ])
+        : 'x';
+    const repHTML = document.createElement('div');
+    repHTML.innerHTML = numRepresntation.toString();
+    repHTML.className = 'rep-data';
+    record.appendChild(repHTML);
     memoryNodes.push(record);
   }
   return memoryNodes;
