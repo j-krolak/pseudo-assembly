@@ -131,22 +131,22 @@ class Interpreter {
 
   bytesToNumber(bytes: byte[]): number {
     const [d, c, b, a] = [
-      bytes[0].val,
-      bytes[1].val,
-      bytes[2].val,
       bytes[3].val,
+      bytes[2].val,
+      bytes[1].val,
+      bytes[0].val,
     ];
     const res = (a << 24) | (b << 16) | (c << 8) | d;
     return res;
   }
 
-  // Little-endian
+  // big-endian
   numberToBytes(n: number): byte[] {
     const res: byte[] = [];
-    res.push({ val: n & 0xff, type: 'DATA' });
-    res.push({ val: (n >> 8) & 0xff, type: 'DATA' });
-    res.push({ val: (n >> 16) & 0xff, type: 'DATA' });
     res.push({ val: (n >> 24) & 0xff, type: 'DATA' });
+    res.push({ val: (n >> 16) & 0xff, type: 'DATA' });
+    res.push({ val: (n >> 8) & 0xff, type: 'DATA' });
+    res.push({ val: n & 0xff, type: 'DATA' });
     return res;
   }
 
