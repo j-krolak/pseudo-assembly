@@ -152,7 +152,9 @@ class Interpreter {
 
   preprocess() {
     while (!this.isAtEnd()) {
-      const tokens = this.splitStatment(this.statements[this.currentLine].val);
+      const tokens = this.splitStatment(
+        this.removeComments(this.statements[this.currentLine].val),
+      );
       if (tokens.length === 0) {
         this.currentLine += 1;
         continue;
@@ -357,10 +359,17 @@ class Interpreter {
     this.eflags |= num < 0 ? 1 << FLAGS.SF : 0;
   }
 
+  removeComments(val: string): string {
+    if (val.trim()[0] === '#') return '';
+    return val.trim().split('#')[0];
+  }
+
   interpretNextLine() {
     this.executedLines += 1;
     if (this.isAtEnd()) return;
-    const tokens = this.splitStatment(this.statements[this.currentLine].val);
+    const tokens = this.splitStatment(
+      this.removeComments(this.statements[this.currentLine].val),
+    );
     if (tokens.length === 0) {
       this.currentLine += 1;
       return;
