@@ -211,14 +211,17 @@ class Interpreter {
             const numberOfMemoryCells = Number(args[0]) * 4;
             const number = this.getNumberInParen(args[1]);
             this.currentMemoryAddress += numberOfMemoryCells;
-            this.bytes = [...this.bytes, ...this.numberToBytes(number)];
-            this.bytes = [
-              ...this.bytes,
-              ...new Array(numberOfMemoryCells - 4).fill({
-                val: 0,
+
+            const numberInBytes = this.numberToBytes(number).map(
+              ({ val }): byte => ({
                 type: 'DATA',
+                val: val,
               }),
-            ];
+            );
+
+            for (let i = 0; i < numberOfMemoryCells / 4; i++) {
+              this.bytes = [...this.bytes, ...numberInBytes];
+            }
           } else if (args.length === 1) {
             const number = this.getNumberInParen(args[0]);
             this.bytes = [...this.bytes, ...this.numberToBytes(number)];
