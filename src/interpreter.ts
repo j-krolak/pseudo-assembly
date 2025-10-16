@@ -496,12 +496,14 @@ class Interpreter {
             this.updateEflags(this.registers[r1]);
             break;
           case 'C':
+            console.log(this.getNumberFromMemory(addr));
+            console.log(this.registers[r1]);
             this.updateEflags(
               this.registers[r1] - this.getNumberFromMemory(addr),
             );
-            this.eflags ^= (1 << FLAGS.ZF) | (1 << FLAGS.SF);
-            this.eflags |= this.registers[r1] === 0 ? 1 << FLAGS.ZF : 0;
-            this.eflags |= this.registers[r1] < 0 ? 1 << FLAGS.SF : 0;
+            // this.eflags ^= (1 << FLAGS.ZF) | (1 << FLAGS.SF);
+            // this.eflags |= this.registers[r1] === 0 ? 1 << FLAGS.ZF : 0;
+            // this.eflags |= this.registers[r1] < 0 ? 1 << FLAGS.SF : 0;
 
             break;
           case 'L':
