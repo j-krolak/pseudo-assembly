@@ -12,6 +12,9 @@ import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup, EditorView } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
 
+// Local storage keys
+const CODE_LS_KEY = 'code';
+
 const runBtn = document.getElementById('run-btn');
 const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
 const registersDiv = document.getElementById('registers');
@@ -25,6 +28,12 @@ const editableCompartment = new Compartment();
 
 const addLineHighlight = StateEffect.define();
 const removeLineHighlight = StateEffect.define();
+
+const persistOnChange = EditorView.updateListener.of((update) => {
+  if (update.docChanged) {
+    localStorage.setItem(CODE_LS_KEY, update.state.doc.toString());
+  }
+});
 
 const lineHighlightField = StateField.define({
   create() {
@@ -85,8 +94,7 @@ const blackBackground = EditorView.theme(
   { dark: true },
 );
 
-let state = EditorState.create({
-  doc: `ZERO DC INTEGER(0)
+let initialCode = `ZERO DC INTEGER(0)
 A DC INTEGER(7)
 B DC INTEGER(3)
 RES DS INTEGER
@@ -108,7 +116,14 @@ LR 0, 1
 LR 1, 3
 J START
 
-END ST 0, RES `,
+END ST 0, RES `;
+
+const item = localStorage.getItem(CODE_LS_KEY);
+if (item) {
+  initialCode = item;
+}
+let state = EditorState.create({
+  doc: initialCode,
   extensions: [
     keymap.of(defaultKeymap),
     basicSetup,
@@ -116,6 +131,7 @@ END ST 0, RES `,
     boysAndGirls,
     lineHighlightField,
     blackBackground,
+    persistOnChange,
   ],
 });
 
