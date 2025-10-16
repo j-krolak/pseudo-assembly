@@ -21,6 +21,8 @@ export const keywords = [
   'DS',
 ];
 
+const MAX_LINES = 1000;
+
 // Register-register instructions
 const rrKeywords = ['AR', 'SR', 'MR', 'DR', 'CR', 'LR'];
 
@@ -70,6 +72,7 @@ class Interpreter {
   bytes: byte[];
   labels: Label[];
   currentLine: number;
+  executedLines: number;
   currentMemoryAddress: number;
   constructor(code: string) {
     this.registers = new Int32Array(16);
@@ -78,6 +81,7 @@ class Interpreter {
       byteSize: 0,
     }));
     this.labels = [];
+    this.executedLines = 0;
     this.currentLine = 0;
     this.currentMemoryAddress = 0;
     this.eflags = 0;
@@ -90,7 +94,13 @@ class Interpreter {
 
   interpret() {
     this.preprocess();
-    while (!this.isAtEnd()) this.interpretNextLine();
+    while (!this.isAtEnd() && this.executedLines < MAX_LINES)
+      this.interpretNextLine();
+    if (this.executedLines >= MAX_LINES) {
+      throw new RuntimeError(
+        `Program halted after exceeding the execution limit of ${MAX_LINES} instructions. Possible infinite loop detected.`,
+      );
+    }
   }
 
   splitStatment(stmt: string): string[] {
@@ -348,6 +358,7 @@ class Interpreter {
   }
 
   interpretNextLine() {
+    this.executedLines += 1;
     if (this.isAtEnd()) return;
     const tokens = this.splitStatment(this.statements[this.currentLine].val);
     if (tokens.length === 0) {

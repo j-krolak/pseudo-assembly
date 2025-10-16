@@ -186,13 +186,14 @@ nextBtn?.addEventListener('click', () => {
   }
 });
 
-runBtn?.addEventListener('click', () => {
+runBtn?.addEventListener('click', async () => {
   errorsDiv.innerHTML = '';
   resetInterpreter();
   const code = view.state.doc.toString();
   interpreter = new Interpreter(code);
   try {
     interpreter.interpret();
+
     displayState();
   } catch (error) {
     if (error instanceof RuntimeError || error instanceof PreprocessingError) {
