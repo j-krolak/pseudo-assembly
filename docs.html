@@ -357,7 +357,9 @@
                 <td class="p-3 border border-[#2E2E2E] font-mono">
                   DC &lt;count&gt;*INTEGER(&lt;value&gt;)
                 </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">DC 5*10</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DC 5*INTEGER(10)
+                </td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Define multiple constants - allocates count*4 bytes, first
                   initialized to value.
@@ -380,7 +382,9 @@
                 <td class="p-3 border border-[#2E2E2E] font-mono">
                   DS &lt;count&gt;*INTEGER
                 </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">DS 10</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono">
+                  DS 10*INTEGER
+                </td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Define storage - allocates count*4 bytes initialized to zero.
                 </td>
