@@ -151,6 +151,7 @@ class Interpreter {
   }
 
   preprocess() {
+    let isDataSection = true;
     while (!this.isAtEnd()) {
       const tokens = this.splitStatment(
         this.removeComments(this.statements[this.currentLine].val),
@@ -164,6 +165,15 @@ class Interpreter {
 
       // Add label to environment
       if (tokens.length > 1 && keywords.includes(tokens[1])) {
+        if (!isDataSection) {
+          throw new PreprocessingError(
+            `[Line ${
+              this.currentLine + 1
+            }] Data declarations (labels with DC/DS) must precede executable instructions. Move label "${
+              tokens[0]
+            }"at the top of the program.`,
+          );
+        }
         if (this.isLabelDefined(tokens[0])) {
           throw new PreprocessingError(
             `[Line ${this.currentLine + 1}] Label "${
@@ -196,6 +206,7 @@ class Interpreter {
         currentIndex += 1;
       }
 
+      isDataSection = false;
       if (!keywords.includes(instruction)) {
         throw new PreprocessingError(
           `[Line ${
