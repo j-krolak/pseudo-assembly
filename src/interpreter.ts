@@ -29,7 +29,7 @@ const rrKeywords = ['AR', 'SR', 'MR', 'DR', 'CR', 'LR'];
 // Register-memory instructions
 const rmKeywords = ['A', 'S', 'M', 'D', 'C', 'L', 'ST', 'LA'];
 
-type byteType = 'INSTRUCTION' | 'DATA';
+type byteType = 'INSTRUCTION' | 'DATA' | 'DATA_HIDDEN';
 
 export type byte = {
   val: number;
@@ -253,7 +253,7 @@ class Interpreter {
             ...this.bytes,
             ...new Array(numberOfMemoryCells).fill({
               val: 0,
-              type: 'DATA',
+              type: 'DATA_HIDDEN',
             }),
           ];
 
@@ -337,10 +337,10 @@ class Interpreter {
   }
   setNumberInMemory(addr: number, num: number) {
     const data = this.numberToBytes(num);
-    this.bytes[addr] = data[0];
-    this.bytes[addr + 1] = data[1];
-    this.bytes[addr + 2] = data[2];
-    this.bytes[addr + 3] = data[3];
+    data.map((val, i) => {
+      this.bytes[addr + i] = val;
+      this.bytes[addr + i].type = 'DATA';
+    });
   }
 
   getStatmentLine(addr: number): number {

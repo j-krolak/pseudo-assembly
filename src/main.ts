@@ -259,10 +259,18 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
       }
 
       const byte = bytes[j];
-      byteHTML.innerHTML =
-        byte.type === 'DATA'
-          ? byte.val.toString(2).padStart(8, '0')
-          : 'xxxxxxxx';
+      switch (byte.type) {
+        case 'DATA':
+          byteHTML.innerHTML = byte.val.toString(2).padStart(8, '0');
+
+          break;
+
+        case 'INSTRUCTION':
+          byteHTML.innerHTML = 'xxxxxxxx';
+          break;
+        case 'DATA_HIDDEN':
+          byteHTML.innerHTML = '~~~~~~~~';
+      }
 
       record.appendChild(byteHTML);
     }
