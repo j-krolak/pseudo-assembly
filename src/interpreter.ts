@@ -68,6 +68,7 @@ export class RuntimeError extends Error {
 class Interpreter {
   statements: Statment[];
   registers: Int32Array;
+  isRegisterInitialized: boolean[];
   eflags: number;
   bytes: byte[];
   labels: Label[];
@@ -86,6 +87,7 @@ class Interpreter {
     this.currentMemoryAddress = 0;
     this.eflags = 0;
     this.bytes = [];
+    this.isRegisterInitialized = new Array(16).fill(false);
   }
 
   isAtEnd() {
@@ -423,6 +425,7 @@ class Interpreter {
         currentIndex += 1;
         const r2 = Number(tokens[currentIndex]);
 
+        this.isRegisterInitialized[r1] = true;
         switch (instruction) {
           case 'AR':
             this.registers[r1] += this.registers[r2];
@@ -472,6 +475,7 @@ class Interpreter {
         }
         currentIndex += 1;
         const addr = this.getMemoryAddr(tokens[currentIndex]);
+        this.isRegisterInitialized[r1] = true;
         switch (instruction) {
           case 'A':
             this.registers[r1] += this.getNumberFromMemory(addr);

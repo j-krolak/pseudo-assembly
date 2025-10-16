@@ -218,13 +218,14 @@ const createRegistersNodes = (registers: Int32Array): Node[] => {
 
     registerHTML.className = 'register';
     const registerName = 'R' + i.toString();
-    registerData.innerHTML =
-      registerName +
-      (i < 10 ? '&nbsp;' : '') +
-      ' 0b' +
-      (register >>> 0).toString(2).padStart(32, '0') +
-      ' ' +
-      register.toString();
+    registerData.innerHTML = registerName + (i < 10 ? '&nbsp;' : '');
+
+    registerData.innerHTML += interpreter.isRegisterInitialized[i]
+      ? ' 0b' +
+        (register >>> 0).toString(2).padStart(32, '0') +
+        ' ' +
+        register.toString()
+      : ' 0b'.padEnd(35, '~');
 
     registerHTML.appendChild(registerData);
     registersHTML.push(registerHTML);
