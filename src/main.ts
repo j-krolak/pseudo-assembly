@@ -11,16 +11,19 @@ import { Decoration, EditorView as View, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup, EditorView } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
+import { examples } from './examples';
 
 // Local storage keys
 const CODE_LS_KEY = 'code';
 
+// HTML elements
 const runBtn = document.getElementById('run-btn');
 const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
 const registersDiv = document.getElementById('registers');
 const memoryDiv = document.getElementById('memory');
 const codeDiv = document.getElementById('code') as Element;
 const errorsDiv = document.getElementById('errors') as HTMLDivElement;
+const selectElement = document.getElementById('examples-select');
 
 // CodeMirror
 let executingLineByLine = false;
@@ -94,30 +97,14 @@ const blackBackground = EditorView.theme(
   { dark: true },
 );
 
-let initialCode = `ZERO DC INTEGER(0)
-A DC INTEGER(7)
-B DC INTEGER(3)
-RES DS INTEGER
+const loadCode = (view: View, code: string) => {
+  localStorage.setItem(CODE_LS_KEY, code);
+  view.dispatch({
+    changes: { from: 0, to: view.state.doc.length, insert: code },
+  });
+};
 
-L 0, A
-L 1, B
-
-START SR 0, 1
-CR 0, 1
-JZ END
-
-L 3, ZERO
-AR 3, 0
-SR 3, 1
-
-JP START
-LR 3, 0
-LR 0, 1
-LR 1, 3
-J START
-
-END ST 0, RES `;
-
+let initialCode = examples[0].code;
 const item = localStorage.getItem(CODE_LS_KEY);
 if (item) {
   initialCode = item;
@@ -308,3 +295,20 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
   return memoryNodes;
 };
 displayState();
+
+const initSelectElement = () => {
+  examples.map(({ name }, i) => {
+    const option = document.createElement('option');
+    option.innerHTML = name;
+    option.value = i.toString();
+    selectElement?.appendChild(option);
+  });
+
+  selectElement?.addEventListener('change', (e: Event) => {
+    const target = e.target as HTMLSelectElement;
+    const code = examples[Number(target.value)].code;
+    loadCode(view, code);
+  });
+};
+
+initSelectElement();

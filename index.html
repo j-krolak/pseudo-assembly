@@ -48,19 +48,28 @@
           <div id="code"></div>
           <div class="flex gap-4 flex-col">
             <div id="errors" class="text-red-500"></div>
-            <div class="flex justify-end gap-2">
-              <button
-                id="next-btn"
-                class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white active:bg-"
-              >
-                Execute line by line
-              </button>
-              <button
-                id="run-btn"
-                class="px-2 py-1 border bg-black hover:bg-white hover:text-black"
-              >
-                Run
-              </button>
+            <div class="flex justify-between">
+              <div class="flex items-center gap-2">
+                <label> Examples</label>
+                <select
+                  id="examples-select"
+                  class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white h-full"
+                ></select>
+              </div>
+              <div class="flex justify-end">
+                <button
+                  id="next-btn"
+                  class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white active:bg-"
+                >
+                  Execute line by line
+                </button>
+                <button
+                  id="run-btn"
+                  class="px-2 py-1 border bg-black hover:bg-white hover:text-black"
+                >
+                  Run
+                </button>
+              </div>
             </div>
           </div>
         </div>

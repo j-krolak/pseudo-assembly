@@ -1,0 +1,135 @@
+export const examples: {
+  name: string;
+  code: string;
+}[] = [
+  {
+    name: 'SUM VECTOR',
+    code: `
+VECTOR DC 20*INTEGER(2)
+VECTOR_LEN DC INTEGER(20)
+
+ONE DC INTEGER(1)
+ZERO DC INTEGER(0)
+WORD_SIZE DC INTEGER(4)
+
+SUM DC INTEGER(0)
+
+# R0 will be the index
+LA 0, VECTOR
+SR 1, 1
+SR 2, 2
+
+START A 2, 0(0)
+A 0, WORD_SIZE
+A 1, ONE
+C 1, VECTOR_LEN
+JZ END
+J START
+
+END ST 2,SUM
+    `,
+  },
+  {
+    name: 'GCD',
+    code: `ZERO DC INTEGER(0)
+A DC INTEGER(7)
+B DC INTEGER(3)
+RES DS INTEGER
+
+L 0, A
+L 1, B
+
+START SR 0, 1
+CR 0, 1
+JZ END
+
+L 3, ZERO
+AR 3, 0
+SR 3, 1
+
+JP START
+LR 3, 0
+LR 0, 1
+LR 1, 3
+J START
+
+END ST 0, RES `,
+  },
+  {
+    name: 'PALINDROM',
+    code: `ONE DC INTEGER(1)
+FOUR DC INTEGER(4)
+
+N DC INTEGER(3)
+
+PA DC INTEGER(3)
+DC INTEGER(4)
+DC INTEGER(3)
+
+RES DC INTEGER(1)
+
+LA 1, P
+L 3, N
+S 3, ONE
+M 3, FO
+AR 3, 1
+
+START CR 3, 1
+JN END
+JZ END
+
+L 4, 0(1)
+L 5, 0(3)
+A 1, FO
+S 3, FO
+CR 4, 5
+JZ START
+
+SR 8,8
+ST 8, RES
+
+END SR 1,1
+    `,
+  },
+  {
+    name: 'BUBBLE SORT',
+    code: `
+JEDEN DC INTEGER(1)
+CZTERY DC INTEGER(4)
+
+N DC INTEGER(3)
+
+P DC INTEGER(-4)
+DC INTEGER(-4)
+DC INTEGER(8)
+
+LA 7, P
+
+L 1, JEDEN
+L 2, N
+
+START LR 3, 1
+S 3, JEDEN
+M 3, CZTERY
+AR 3, 7
+
+LR 4, 3
+A 4,  CZTERY
+L 5, 0(3)
+
+L 6, 0(4)
+CR 5, 6
+JN KROK
+ST 6, 0(3)
+ST 5, 0(4)
+
+KROK A 1, JEDEN
+CR 1, 2
+JN START
+S 2, JEDEN
+L 1, JEDEN
+C 2, JEDEN
+JP START 
+    `,
+  },
+];
