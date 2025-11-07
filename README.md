@@ -11,6 +11,4 @@ Interpreter for pseudo-assembly language created based on lectures from the Wars
 
 ### Links
 
-- [**Tutorial**](https://j-krolak.github.io/pseudo-assembly/tutorial) - Interactive step-by-step learning experience
-- [**Playground**](https://j-krolak.github.io/pseudo-assembly/) - Try the interpreter online
-- [**Documentation**](https://j-krolak.github.io/pseudo-assembly/docs) - Complete instruction reference
+[Docs](https://j-krolak.github.io/pseudo-assembly/docs)
