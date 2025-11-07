@@ -137,7 +137,7 @@ const resetInterpreter = () => {
   });
   removeHighlight(view);
 
-  nextBtn.innerHTML = 'Execute line by line';
+  nextBtn.innerHTML = 'Run line by line';
 };
 
 nextBtn?.addEventListener('click', () => {
