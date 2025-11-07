@@ -50,3 +50,23 @@
   outline: none !important;
   border: none;
 }
+
+/* Tutorial specific styles */
+.tutorial-step {
+  opacity: 1;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.tutorial-editor-container {
+  position: relative;
+}
+
+.tutorial-editor {
+  min-height: 120px;
+  border: 1px solid #2e2e2e;
+}
+
+.feedback {
+  min-height: 1.25rem;
+  padding: 0.25rem;
+}

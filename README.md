@@ -1,4 +1,16 @@
 ## pseudo assembly
+
 Interpreter for pseudo-assembly language created based on lectures from the Warsaw University of Technology (Politechnika Warszawska, PW).
 
-[Docs](https://j-krolak.github.io/pseudo-assembly/docs)
+### Features
+
+- **Interactive Playground**: Write and execute pseudo assembly code with real-time feedback
+- **Step-by-step Tutorial**: Learn pseudo assembly from basics to advanced concepts
+- **Comprehensive Documentation**: Complete reference for all instructions and addressing modes
+- **Visual Debugging**: See register states and memory contents as your code executes
+
+### Links
+
+- [**Tutorial**](https://j-krolak.github.io/pseudo-assembly/tutorial) - Interactive step-by-step learning experience
+- [**Playground**](https://j-krolak.github.io/pseudo-assembly/) - Try the interpreter online
+- [**Documentation**](https://j-krolak.github.io/pseudo-assembly/docs) - Complete instruction reference
