@@ -90,7 +90,7 @@ ST 1, RESULT`,
     expectedValues: [
       {
         labelName: 'RESULT',
-        value: 0,
+        value: 5,
       },
     ],
     solution: `COUNTER DC INTEGER(1)
