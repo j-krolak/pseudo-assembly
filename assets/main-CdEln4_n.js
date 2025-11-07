@@ -64,10 +64,10 @@ DC INTEGER(3)
 
 RES DC INTEGER(1)
 
-LA 1, P
+LA 1, PA
 L 3, N
 S 3, ONE
-M 3, FO
+M 3, FOUR
 AR 3, 1
 
 START CR 3, 1
@@ -76,8 +76,8 @@ JZ END
 
 L 4, 0(1)
 L 5, 0(3)
-A 1, FO
-S 3, FO
+A 1, FOUR
+S 3, FOUR
 CR 4, 5
 JZ START
 
