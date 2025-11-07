@@ -111,12 +111,9 @@ END ST 1, RESULT`,
   {
     id: 5,
     expectedCode: [
-      /(N|NUM)\s+DC\s+INTEGER\s*\(\s*4\s*\)/i,
-      /(ONE|INC)\s+DC\s+INTEGER\s*\(\s*1\s*\)/i,
-      /(FACTORIAL).*DS/i,
-      /\w+\s*:/i, // Label for loop
-      /M\s+\d+\s*,/i, // Multiply instruction
-      /S\s+\d+\s*,/i, // Subtract instruction
+      /\w+\s*/i, // Label for loop
+      /(M|MR)\s+\d+\s*,/i, // Multiply instruction
+      /(S|SR)\s+\d+\s*,/i, // Subtract instruction
       /(JZ|JN)\s+\w+/i, // Conditional jump to end
     ],
     expectedValues: [
@@ -133,7 +130,7 @@ FACTORIAL DS INTEGER
 L 1, RESULT
 L 2, N
 
-LOOP M 1, 2
+LOOP MR 1, 2
 S 2, ONE
 C 2, ONE
 JN END

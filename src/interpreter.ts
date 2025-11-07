@@ -504,8 +504,6 @@ class Interpreter {
             this.updateEflags(this.registers[r1]);
             break;
           case 'C':
-            console.log(this.getNumberFromMemory(addr));
-            console.log(this.registers[r1]);
             this.updateEflags(
               this.registers[r1] - this.getNumberFromMemory(addr),
             );
@@ -581,6 +579,7 @@ class Interpreter {
   }
 
   getValueByLabel(label: string): number {
+    console.log(label);
     const foundedLabel = this.labels.find((item) => item.label === label);
     if (!foundedLabel) throw Error(`Label "${label}" doesn't exist.`);
     return this.getNumberFromMemory(foundedLabel.address);

@@ -214,14 +214,20 @@ class TutorialManager {
     } else {
       isValid &&= expectedCode.test(code);
     }
-    isValid &&= step.expectedValues.every(({ labelName, value }) => {
-      return interpret.getValueByLabel(labelName) == value;
-    });
+
+    isValid =
+      isValid &&
+      step.expectedValues.every((label) => {
+        try {
+          return interpret.getValueByLabel(label.labelName) === label.value;
+        } catch (err) {
+          return false;
+        }
+      });
     return isValid;
   }
 }
 
-// Initialize tutorial when page loads
 document.addEventListener('DOMContentLoaded', () => {
   new TutorialManager();
 });
