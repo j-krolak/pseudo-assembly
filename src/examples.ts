@@ -4,8 +4,7 @@ export const examples: {
 }[] = [
   {
     name: 'SUM VECTOR',
-    code: `
-VECTOR DC 20*INTEGER(2)
+    code: `VECTOR DC 20*INTEGER(2)
 VECTOR_LEN DC INTEGER(20)
 
 ONE DC INTEGER(1)
@@ -14,7 +13,6 @@ WORD_SIZE DC INTEGER(4)
 
 SUM DC INTEGER(0)
 
-# R0 will be the index
 LA 0, VECTOR
 SR 1, 1
 SR 2, 2
@@ -93,13 +91,12 @@ END SR 1,1
   },
   {
     name: 'BUBBLE SORT',
-    code: `
-JEDEN DC INTEGER(1)
+    code: `JEDEN DC INTEGER(1)
 CZTERY DC INTEGER(4)
 
 N DC INTEGER(3)
 
-P DC INTEGER(-4)
+P DC INTEGER(12)
 DC INTEGER(-4)
 DC INTEGER(8)
 
@@ -131,5 +128,74 @@ L 1, JEDEN
 C 2, JEDEN
 JP START 
     `,
+  },
+  {
+    name: 'MERGE SORT JOIN',
+    code: `M DC INTEGER(2)
+A DC INTEGER(1)
+DC INTEGER(2)
+
+N DC INTEGER(2)
+B DC INTEGER(1)
+DC INTEGER(2)
+
+C DS 4*INTEGER
+JEDEN DC INTEGER(1)
+
+L 1, JEDEN
+LR 2, 1
+
+LA 3, C 
+LA 4, A
+LA 5, B
+LR 8, 1
+AR 8, 8
+AR 8, 8
+
+WARUNEK C 1, M
+JP UZUPELNIJ_B 
+C 2, N
+JP UZUPELNIJ_A
+L 6, 0(4)
+L 7, 0(5)
+
+CR 6, 7
+JP WPP
+ST 6, 0(3)
+A 1, JEDEN
+AR 4, 8
+AR 3, 8
+J WARUNEK
+
+WPP ST 7, 0(3)
+A 2, JEDEN
+AR 5, 8
+AR 3, 8
+
+
+J WARUNEK
+
+UZUPELNIJ_B C 2, N
+JP KONIEC
+L 7, 0(5)
+ST 7, 0(3)
+AR 3, 8
+AR 5, 8
+A 2, JEDEN
+J UZUPELNIJ_B
+
+UZUPELNIJ_A  C 1, M
+JP KONIEC
+L 6, 0(4)
+ST 6, 0(3)
+AR 4, 8
+AR 3, 8
+A 1, JEDEN
+J UZUPELNIJ_A
+
+
+KONIEC SR 1, 1
+ 
+  `,
   },
 ];
