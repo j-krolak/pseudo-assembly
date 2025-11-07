@@ -1,112 +1,11 @@
-import { Interpreter, PreprocessingError, RuntimeError } from './interpreter';
+import { Interpreter, PreprocessingError, RuntimeError } from '../interpreter';
 import { EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
+import { tutorialSteps, type TutorialStep } from './tutorial-steps';
 
-// Tutorial step data
-const tutorialSteps = [
-  {
-    id: 1,
-    expectedCode: /NUMBER\s+DC\s+INTEGER\s*\(\s*42\s*\)/i,
-    solution: `NUMBER DC INTEGER(42)`,
-    successMessage:
-      "Perfect! You've declared a variable with the DC instruction.",
-  },
-  {
-    id: 2,
-    expectedCode: [
-      /VALUE\s+DC\s+INTEGER\s*\(\s*100\s*\)/i,
-      /L\s+1\s*,\s*VALUE/i,
-      /RESULT\s+DS\s+INTEGER/i,
-      /ST\s+1\s*,\s*RESULT/i,
-    ],
-    solution: `VALUE DC INTEGER(100)
-RESULT DS INTEGER
-
-L 1, VALUE
-ST 1, RESULT`,
-    successMessage: "Excellent! You've mastered loading and storing data.",
-  },
-  {
-    id: 3,
-    expectedCode: [
-      /DC\s+INTEGER\s*\(\s*10\s*\)/i,
-      /DC\s+INTEGER\s*\(\s*5\s*\)/i,
-      /DC\s+INTEGER\s*\(\s*3\s*\)/i,
-      /A\s+\d+\s*,/i,
-      /M\s+\d+\s*,/i,
-    ],
-    solution: `NUM1 DC INTEGER(10)
-NUM2 DC INTEGER(5)
-NUM3 DC INTEGER(3)
-RESULT DS INTEGER
-
-L 1, NUM1
-A 1, NUM2
-M 1, NUM3
-ST 1, RESULT`,
-    successMessage: 'Great! You calculated (10 + 5) * 3 = 45 successfully.',
-  },
-  {
-    id: 4,
-    expectedCode: [
-      /(COUNTER|CTR|I)\s+DC\s+INTEGER\s*\(\s*[01]\s*\)/i,
-      /(LIMIT|MAX|END_VAL)\s+DC\s+INTEGER\s*\(\s*5\s*\)/i,
-      /(ONE|INC)\s+DC\s+INTEGER\s*\(\s*1\s*\)/i,
-      /\w+\s*:/i, // Label
-      /C\s+\d+\s*,/i, // Compare instruction
-      /J[ZN]\s+\w+/i, // Conditional jump
-      /J\s+\w+/i, // Unconditional jump
-    ],
-    solution: `COUNTER DC INTEGER(1)
-LIMIT DC INTEGER(5)
-ONE DC INTEGER(1)
-RESULT DS INTEGER
-
-L 1, COUNTER
-
-LOOP A 1, ONE
-C 1, LIMIT
-JZ END
-J LOOP
-
-END ST 1, RESULT`,
-    successMessage: "Fantastic! You've created a loop that counts from 1 to 5.",
-  },
-  {
-    id: 5,
-    expectedCode: [
-      /(N|NUM)\s+DC\s+INTEGER\s*\(\s*4\s*\)/i,
-      /(ONE|INC)\s+DC\s+INTEGER\s*\(\s*1\s*\)/i,
-      /(FACTORIAL|RESULT|RES).*DS/i,
-      /\w+\s*:/i, // Label for loop
-      /M\s+\d+\s*,/i, // Multiply instruction
-      /S\s+\d+\s*,/i, // Subtract instruction
-      /(JZ|JN)\s+\w+/i, // Conditional jump to end
-    ],
-    solution: `N DC INTEGER(4)
-ONE DC INTEGER(1)
-RESULT DC INTEGER(1)
-FACTORIAL DS INTEGER
-
-L 1, RESULT
-L 2, N
-
-LOOP M 1, 2
-S 2, ONE
-C 2, ONE
-JN END
-J LOOP
-
-END ST 1, FACTORIAL`,
-    successMessage:
-      "🎉 Amazing! You've successfully calculated 4! = 24. You're now ready for advanced pseudo assembly programming!",
-  },
-];
-
-// Create a custom theme for tutorial editors
 const tutorialTheme = EditorView.theme(
   {
     '&': {
@@ -132,7 +31,7 @@ const tutorialTheme = EditorView.theme(
 class TutorialManager {
   private currentStep: number = 1;
   private editors: { [key: number]: EditorView } = {};
-  private readonly totalSteps = 5;
+  private readonly totalSteps = 6;
 
   constructor() {
     this.initializeEditors();
@@ -227,7 +126,6 @@ class TutorialManager {
         this.currentStep === this.totalSteps ? 'none' : 'block';
     }
 
-    // Show completion message if on last step
     const completionMessage = document.getElementById('completion-message');
     if (completionMessage) {
       completionMessage.style.display =
@@ -258,18 +156,6 @@ class TutorialManager {
           insert: stepData.solution,
         },
       });
-
-      // Show check answer button
-      const loadBtn = document.querySelector(
-        `[data-step="${step}"].load-example`,
-      ) as HTMLElement;
-      const checkBtn = document.querySelector(
-        `[data-step="${step}"].check-answer`,
-      ) as HTMLElement;
-      if (loadBtn && checkBtn) {
-        loadBtn.style.display = 'none';
-        checkBtn.style.display = 'inline-block';
-      }
     }
   }
 
@@ -283,17 +169,14 @@ class TutorialManager {
     const userCode = editor.state.doc.toString();
 
     try {
-      // Try to run the code to see if it's valid
       const interpreter = new Interpreter(userCode);
       interpreter.interpret();
 
-      // Check if code matches expected patterns
-      const isCorrect = this.validateCode(userCode, stepData.expectedCode);
+      const isCorrect = this.validateCode(interpreter, userCode, stepData);
 
       if (isCorrect) {
         feedbackElement.innerHTML = `<span class="text-green-400">✓ ${stepData.successMessage}</span>`;
 
-        // Enable next step if available
         if (step < this.totalSteps) {
           setTimeout(() => {
             const nextBtn = document.getElementById(
@@ -319,12 +202,22 @@ class TutorialManager {
     }
   }
 
-  private validateCode(code: string, expected: RegExp | RegExp[]): boolean {
-    if (Array.isArray(expected)) {
-      return expected.every((pattern) => pattern.test(code));
+  private validateCode(
+    interpret: Interpreter,
+    code: string,
+    step: TutorialStep,
+  ): boolean {
+    let isValid = true;
+    const expectedCode = step.expectedCode;
+    if (Array.isArray(expectedCode)) {
+      isValid &&= expectedCode.every((pattern) => pattern.test(code));
     } else {
-      return expected.test(code);
+      isValid &&= expectedCode.test(code);
     }
+    isValid &&= step.expectedValues.every(({ labelName, value }) => {
+      return interpret.getValueByLabel(labelName) == value;
+    });
+    return isValid;
   }
 }
 

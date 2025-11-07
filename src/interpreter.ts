@@ -207,6 +207,14 @@ class Interpreter {
         );
       }
 
+      if (tokens.length <= currentIndex) {
+        throw new PreprocessingError(
+          `[Line ${
+            this.currentLine + 1
+          }] Data declarations (DC/DS) must specify a data type. Use format: LABEL DC INTEGER(value) or LABEL DS INTEGER`,
+        );
+      }
+
       const args = tokens[currentIndex].split('*');
       if (instruction === 'DC' || instruction == 'DS') {
         if (!isDataSection) {
@@ -570,6 +578,12 @@ class Interpreter {
     }
     this.currentMemoryAddress += this.statements[this.currentLine].byteSize;
     this.currentLine += 1;
+  }
+
+  getValueByLabel(label: string): number {
+    const foundedLabel = this.labels.find((item) => item.label === label);
+    if (!foundedLabel) throw Error(`Label "${label}" doesn't exist.`);
+    return this.getNumberFromMemory(foundedLabel.address);
   }
 }
 export { Interpreter };

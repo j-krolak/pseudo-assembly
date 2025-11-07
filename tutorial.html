@@ -49,7 +49,10 @@
         </div>
 
         <!-- Tutorial Steps -->
-        <div id="tutorial-container" class="space-y-8">
+        <div
+          id="tutorial-container"
+          class="space-y-8 min-h-[600px] flex items-center"
+        >
           <!-- Step 1: Introduction -->
           <div
             class="tutorial-step bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded"
@@ -64,12 +67,11 @@
                   class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="1"
                 >
-                  Load Example
+                  Load example solution
                 </button>
                 <button
                   class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="1"
-                  style="display: none"
                 >
                   Check Answer
                 </button>
@@ -124,12 +126,11 @@
                   class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="2"
                 >
-                  Load Example
+                  Load example solution
                 </button>
                 <button
                   class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="2"
-                  style="display: none"
                 >
                   Check Answer
                 </button>
@@ -195,12 +196,11 @@
                   class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="3"
                 >
-                  Load Example
+                  Load example solution
                 </button>
                 <button
                   class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="3"
-                  style="display: none"
                 >
                   Check Answer
                 </button>
@@ -268,12 +268,11 @@
                   class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="4"
                 >
-                  Load Example
+                  Load example solution
                 </button>
                 <button
                   class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="4"
-                  style="display: none"
                 >
                   Check Answer
                 </button>
@@ -328,12 +327,11 @@
                   class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="5"
                 >
-                  Load Example
+                  Load example solution
                 </button>
                 <button
                   class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
                   data-step="5"
-                  style="display: none"
                 >
                   Check Answer
                 </button>
@@ -373,6 +371,26 @@
               </div>
             </div>
           </div>
+
+          <!-- Completion Message -->
+          <div
+            id="step-6"
+            class="tutorial-step text-center mt-8 px-6 py-42 bg-green-900 border border-green-600 rounded w-full"
+            style="display: none"
+          >
+            <h2 class="text-2xl font-bold text-green-100 mb-2">
+              🎉 Congratulations!
+            </h2>
+            <p class="text-green-200 mb-4">
+              You've completed the pseudo assembly tutorial!
+            </p>
+            <a
+              href="/pseudo-assembly/"
+              class="px-4 py-2 border border-green-400 bg-green-800 hover:bg-green-700 text-white rounded"
+            >
+              Try the Full Playground
+            </a>
+          </div>
         </div>
 
         <!-- Navigation -->
@@ -394,29 +412,9 @@
             Next Step
           </button>
         </div>
-
-        <!-- Completion Message -->
-        <div
-          id="completion-message"
-          class="text-center mt-8 p-6 bg-green-900 border border-green-600 rounded"
-          style="display: none"
-        >
-          <h2 class="text-2xl font-bold text-green-100 mb-2">
-            🎉 Congratulations!
-          </h2>
-          <p class="text-green-200 mb-4">
-            You've completed the pseudo assembly tutorial!
-          </p>
-          <a
-            href="/pseudo-assembly/"
-            class="px-4 py-2 border border-green-400 bg-green-800 hover:bg-green-700 text-white rounded"
-          >
-            Try the Full Playground
-          </a>
-        </div>
       </div>
     </div>
 
-    <script type="module" src="/src/tutorial.ts"></script>
+    <script type="module" src="/src/tutorial/tutorial-manager.ts"></script>
   </body>
 </html>
