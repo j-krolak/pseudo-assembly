@@ -79,7 +79,6 @@ ST 1, RESULT`,
   {
     id: 4,
     expectedCode: [
-      /(COUNTER|CTR|I)\s+DC\s+INTEGER\s*\(\s*[01]\s*\)/i,
       /\w+\s*/i, // Label
       /C\s+\d+\s*,/i, // Compare instruction
       /J[ZN]\s+\w+/i, // Conditional jump
