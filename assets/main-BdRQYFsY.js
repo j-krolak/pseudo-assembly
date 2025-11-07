@@ -1,4 +1,4 @@
-import{S as J,E as a,a as O,D as N,b as y,k as H,c as P,C as U,d as B,e as v,I as f,R as L,P as C}from"./tomorrow-BNdOAJQP.js";/* empty css              */const S=[{name:"SUM VECTOR",code:`VECTOR DC 20*INTEGER(2)
+import{S as J,E as a,a as O,D as N,b as y,k as H,c as P,C as U,d as B,e as v,I as f,R as L,P as C}from"./tomorrow-BgShzc1h.js";/* empty css              */const S=[{name:"SUM VECTOR",code:`VECTOR DC 20*INTEGER(2)
 VECTOR_LEN DC INTEGER(20)
 
 ONE DC INTEGER(1)
