@@ -10,7 +10,7 @@ RESULT DS INTEGER
 L 1, NUM1
 A 1, NUM2
 M 1, NUM3
-ST 1, RESULT`,successMessage:"Great! You calculated (10 + 5) * 3 = 45 successfully."},{id:4,expectedCode:[/(COUNTER|CTR|I)\s+DC\s+INTEGER\s*\(\s*[01]\s*\)/i,/(LIMIT|MAX|END_VAL)\s+DC\s+INTEGER\s*\(\s*5\s*\)/i,/(ONE|INC)\s+DC\s+INTEGER\s*\(\s*1\s*\)/i,/\w+\s*:/i,/C\s+\d+\s*,/i,/J[ZN]\s+\w+/i,/J\s+\w+/i],expectedValues:[{labelName:"RESULT",value:0}],solution:`COUNTER DC INTEGER(1)
+ST 1, RESULT`,successMessage:"Great! You calculated (10 + 5) * 3 = 45 successfully."},{id:4,expectedCode:[/(COUNTER|CTR|I)\s+DC\s+INTEGER\s*\(\s*[01]\s*\)/i,/(LIMIT|MAX|END_VAL)\s+DC\s+INTEGER\s*\(\s*5\s*\)/i,/(ONE|INC)\s+DC\s+INTEGER\s*\(\s*1\s*\)/i,/\w+\s*:/i,/C\s+\d+\s*,/i,/J[ZN]\s+\w+/i,/J\s+\w+/i],expectedValues:[{labelName:"RESULT",value:5}],solution:`COUNTER DC INTEGER(1)
 LIMIT DC INTEGER(5)
 ONE DC INTEGER(1)
 RESULT DS INTEGER
