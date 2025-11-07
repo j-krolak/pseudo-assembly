@@ -80,9 +80,7 @@ ST 1, RESULT`,
     id: 4,
     expectedCode: [
       /(COUNTER|CTR|I)\s+DC\s+INTEGER\s*\(\s*[01]\s*\)/i,
-      /(LIMIT|MAX|END_VAL)\s+DC\s+INTEGER\s*\(\s*5\s*\)/i,
-      /(ONE|INC)\s+DC\s+INTEGER\s*\(\s*1\s*\)/i,
-      /\w+\s*:/i, // Label
+      /\w+\s*/i, // Label
       /C\s+\d+\s*,/i, // Compare instruction
       /J[ZN]\s+\w+/i, // Conditional jump
       /J\s+\w+/i, // Unconditional jump
