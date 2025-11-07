@@ -537,7 +537,9 @@ class Interpreter {
             this.currentMemoryAddress = addr;
             return;
           case 'JP':
-            if (!(this.eflags & (1 << FLAGS.SF))) {
+            if (
+              !(this.eflags & (1 << FLAGS.SF) || this.eflags & (1 << FLAGS.ZF))
+            ) {
               this.currentLine = statmentLine;
               this.currentMemoryAddress = addr;
               return;
