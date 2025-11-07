@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/pseudo-assembly/pasm.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pseudo assembly - Tutorial</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script type="module" crossorigin src="/pseudo-assembly/assets/tutorial-BvcFDcF6.js"></script>
+    <link rel="modulepreload" crossorigin href="/pseudo-assembly/assets/tomorrow-Cx33cH7u.js">
+    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-CZ6aF6LG.css">
+  </head>
+  <body class="font-mono">
+    <nav
+      class="absolute top-0 right-0 left-0 z-100 px-12 py-6 flex flex-row justify-between items-center"
+    >
+      <a href="/pseudo-assembly/">
+        <h1 class="text-xl">pseudo assembly</h1>
+      </a>
+      <div class="flex items-center gap-4 text-xl">
+        <a href="/pseudo-assembly/">playground</a>
+        <a href="/pseudo-assembly/tutorial">tutorial</a>
+        <a href="/pseudo-assembly/docs">docs</a>
+        <a href="https://github.com/j-krolak/pseudo-assembly">
+          <img
+            src="/pseudo-assembly/github-mark-white.svg"
+            alt="GitHub"
+            width="20"
+            height="20"
+          />
+        </a>
+      </div>
+    </nav>
+    <div class="relative min-h-screen w-full bg-black px-12 py-24">
+      <div
+        class="z-0 absolute inset-0 [background-size:40px_40px] [background-image:linear-gradient(to_right,#262626_1px,transparent_1px),linear-gradient(to_bottom,#262626_1px,transparent_1px)]"
+      ></div>
+      <div
+        class="z-0 pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"
+      ></div>
+
+      <div class="relative z-10 max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="text-center mb-12">
+          <h1 class="text-4xl font-bold mb-4 text-white">
+            Interactive Tutorial
+          </h1>
+          <p class="text-xl text-gray-300">
+            Learn pseudo assembly programming step by step
+          </p>
+        </div>
+
+        <!-- Tutorial Steps -->
+        <div id="tutorial-container" class="space-y-8">
+          <!-- Step 1: Introduction -->
+          <div
+            class="tutorial-step bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded"
+            id="step-1"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-bold text-white">
+                Step 1: Basic Data Declaration
+              </h2>
+              <div class="flex gap-2">
+                <button
+                  class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="1"
+                >
+                  Load Example
+                </button>
+                <button
+                  class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="1"
+                  style="display: none"
+                >
+                  Check Answer
+                </button>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <p class="text-gray-300">
+                  Let's start with the basics. In pseudo assembly, you can
+                  declare data using
+                  <code class="bg-[#2E2E2E] px-2 py-1">DC</code> (Define
+                  Constant) and
+                  <code class="bg-[#2E2E2E] px-2 py-1">DS</code> (Define Space).
+                </p>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Task:</h3>
+                  <p class="text-gray-300">
+                    Create a variable called <strong>NUMBER</strong> with value
+                    <strong>42</strong> using the DC instruction.
+                  </p>
+                </div>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Hint:</h3>
+                  <p class="text-gray-300">
+                    Use: <code>VARIABLE_NAME DC INTEGER(value)</code>
+                  </p>
+                </div>
+              </div>
+
+              <div class="tutorial-editor-container">
+                <div id="tutorial-editor-1" class="tutorial-editor"></div>
+                <div class="feedback mt-2 text-sm" id="feedback-1"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 2: Load and Store -->
+          <div
+            class="tutorial-step bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded"
+            id="step-2"
+            style="display: none"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-bold text-white">
+                Step 2: Load and Store Operations
+              </h2>
+              <div class="flex gap-2">
+                <button
+                  class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="2"
+                >
+                  Load Example
+                </button>
+                <button
+                  class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="2"
+                  style="display: none"
+                >
+                  Check Answer
+                </button>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <p class="text-gray-300">
+                  Now let's learn to move data between memory and registers
+                  using <code class="bg-[#2E2E2E] px-2 py-1">L</code> (Load) and
+                  <code class="bg-[#2E2E2E] px-2 py-1">ST</code> (Store).
+                </p>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Task:</h3>
+                  <p class="text-gray-300">
+                    1. Create a variable <strong>VALUE</strong> with value
+                    <strong>100</strong><br />
+                    2. Load it into register <strong>R1</strong><br />
+                    3. Create space for <strong>RESULT</strong><br />
+                    4. Store R1 into RESULT
+                  </p>
+                </div>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Instructions:</h3>
+                  <ul class="text-gray-300 space-y-1">
+                    <li>
+                      • <code>L reg, memory</code> - Load from memory to
+                      register
+                    </li>
+                    <li>
+                      • <code>ST reg, memory</code> - Store from register to
+                      memory
+                    </li>
+                    <li>
+                      • <code>DS INTEGER</code> - Define space for one integer
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tutorial-editor-container">
+                <div id="tutorial-editor-2" class="tutorial-editor"></div>
+                <div class="feedback mt-2 text-sm" id="feedback-2"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 3: Arithmetic Operations -->
+          <div
+            class="tutorial-step bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded"
+            id="step-3"
+            style="display: none"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-bold text-white">
+                Step 3: Arithmetic Operations
+              </h2>
+              <div class="flex gap-2">
+                <button
+                  class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="3"
+                >
+                  Load Example
+                </button>
+                <button
+                  class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="3"
+                  style="display: none"
+                >
+                  Check Answer
+                </button>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <p class="text-gray-300">
+                  Let's perform arithmetic operations: Add, Subtract, Multiply,
+                  and Divide.
+                </p>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Task:</h3>
+                  <p class="text-gray-300">
+                    Calculate: (10 + 5) * 3 and store the result.<br />
+                    Use registers R1, R2, R3 for intermediate calculations.
+                  </p>
+                </div>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">
+                    Arithmetic Instructions:
+                  </h3>
+                  <ul class="text-gray-300 space-y-1">
+                    <li>
+                      • <code>A reg, memory</code> - Add memory value to
+                      register
+                    </li>
+                    <li>
+                      • <code>S reg, memory</code> - Subtract memory value from
+                      register
+                    </li>
+                    <li>
+                      • <code>M reg, memory</code> - Multiply register by memory
+                      value
+                    </li>
+                    <li>
+                      • <code>AR reg1, reg2</code> - Add register to register
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tutorial-editor-container">
+                <div id="tutorial-editor-3" class="tutorial-editor"></div>
+                <div class="feedback mt-2 text-sm" id="feedback-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 4: Loops and Jumps -->
+          <div
+            class="tutorial-step bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded"
+            id="step-4"
+            style="display: none"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-bold text-white">
+                Step 4: Loops with Jumps
+              </h2>
+              <div class="flex gap-2">
+                <button
+                  class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="4"
+                >
+                  Load Example
+                </button>
+                <button
+                  class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="4"
+                  style="display: none"
+                >
+                  Check Answer
+                </button>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <p class="text-gray-300">
+                  Learn to create loops using labels and conditional jumps.
+                </p>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Task:</h3>
+                  <p class="text-gray-300">
+                    Create a loop that counts from 1 to 5 and stores the final
+                    counter value.<br />
+                    Use a loop with a label and conditional jump.
+                  </p>
+                </div>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Jump Instructions:</h3>
+                  <ul class="text-gray-300 space-y-1">
+                    <li>• <code>LABEL instruction</code> - Define a label</li>
+                    <li>• <code>J LABEL</code> - Unconditional jump</li>
+                    <li>• <code>JZ LABEL</code> - Jump if zero flag is set</li>
+                    <li>• <code>C reg, memory</code> - Compare (sets flags)</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="tutorial-editor-container">
+                <div id="tutorial-editor-4" class="tutorial-editor"></div>
+                <div class="feedback mt-2 text-sm" id="feedback-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Step 5: Final Challenge -->
+          <div
+            class="tutorial-step bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded"
+            id="step-5"
+            style="display: none"
+          >
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-2xl font-bold text-white">
+                Step 5: Final Challenge - Calculate Factorial
+              </h2>
+              <div class="flex gap-2">
+                <button
+                  class="load-example px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="5"
+                >
+                  Load Example
+                </button>
+                <button
+                  class="check-answer px-3 py-1 text-sm border bg-black hover:bg-white hover:text-black"
+                  data-step="5"
+                  style="display: none"
+                >
+                  Check Answer
+                </button>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-2 gap-6">
+              <div class="space-y-4">
+                <p class="text-gray-300">
+                  Put it all together! Calculate the factorial of a number using
+                  all the concepts you've learned.
+                </p>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Challenge:</h3>
+                  <p class="text-gray-300">
+                    Write a program that calculates 4! (4 factorial = 4 × 3 × 2
+                    × 1 = 24)<br />
+                    Store the result in a variable called FACTORIAL.
+                  </p>
+                </div>
+
+                <div class="bg-[#2E2E2E] p-4 rounded">
+                  <h3 class="text-lg font-bold mb-2">Algorithm:</h3>
+                  <ol class="text-gray-300 space-y-1">
+                    <li>1. Start with N = 4</li>
+                    <li>2. Initialize result = 1</li>
+                    <li>3. While N > 0: result = result × N, N = N - 1</li>
+                    <li>4. Store final result</li>
+                  </ol>
+                </div>
+              </div>
+
+              <div class="tutorial-editor-container">
+                <div id="tutorial-editor-5" class="tutorial-editor"></div>
+                <div class="feedback mt-2 text-sm" id="feedback-5"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div
+          class="flex justify-between items-center mt-8 pt-6 border-t border-[#2E2E2E]"
+        >
+          <button
+            id="prev-btn"
+            class="px-4 py-2 border bg-black hover:bg-white hover:text-black disabled:opacity-50"
+            disabled
+          >
+            Previous Step
+          </button>
+          <div id="step-indicator" class="text-gray-400">Step 1 of 5</div>
+          <button
+            id="next-btn"
+            class="px-4 py-2 border bg-black hover:bg-white hover:text-black"
+          >
+            Next Step
+          </button>
+        </div>
+
+        <!-- Completion Message -->
+        <div
+          id="completion-message"
+          class="text-center mt-8 p-6 bg-green-900 border border-green-600 rounded"
+          style="display: none"
+        >
+          <h2 class="text-2xl font-bold text-green-100 mb-2">
+            🎉 Congratulations!
+          </h2>
+          <p class="text-green-200 mb-4">
+            You've completed the pseudo assembly tutorial!
+          </p>
+          <a
+            href="/pseudo-assembly/"
+            class="px-4 py-2 border border-green-400 bg-green-800 hover:bg-green-700 text-white rounded"
+          >
+            Try the Full Playground
+          </a>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
