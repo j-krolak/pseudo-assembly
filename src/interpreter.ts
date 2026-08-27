@@ -289,7 +289,7 @@ class Interpreter {
   }
 
   isAlphaNumeric(val: string): boolean {
-    for (let c in val.split('')) {
+    for (let c of val.split('')) {
       if (
         !(
           (c >= 'a' && c <= 'z') ||
