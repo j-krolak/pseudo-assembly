@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pseudo assembly</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-CZ6aF6LG.css">
+    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-CFuB3DlW.css">
   </head>
   <body class="font-mono">
     <nav
@@ -36,16 +36,14 @@
       <div
         class="z-0 pointer-events-none absolute inset-0 flex items-center justify-center bg-white [mask-image:radial-gradient(ellipse_at_center,transparent_20%,black)] dark:bg-black"
       ></div>
-      <div
-        class="relative z-10 bg-black flex-1 p-6 border-2 border-[#2E2E2E] space-y-8"
-      >
-        <section>
+      <div class="relative z-10 flex-1 space-y-8">
+        <section class="panel p-6">
           <h2
-            class="text-3xl font-bold mb-6 text-white border-b border-[#2E2E2E] pb-2"
+            class="text-3xl font-bold mb-6 text-white"
           >
             Pseudo Assembly Language Documentation
           </h2>
-          <div class="bg-[#1A1A1A] p-6 border border-[#2E2E2E] rounded">
+          <div>
             <p class="text-lg mb-4 text-gray-300">
               This pseudo-assembly language and interpreter were created based
               on lectures from the
@@ -65,13 +63,19 @@
           </div>
         </section>
 
-        <section>
+        <section class="panel p-6">
           <h2
-            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+            class="text-2xl font-bold mb-4 text-white"
           >
             Register-Memory Instructions
           </h2>
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse [table-layout:fixed]">
+            <colgroup>
+              <col class="w-[10%]" />
+              <col class="w-[20%]" />
+              <col class="w-[20%]" />
+              <col class="w-[50%]" />
+            </colgroup>
             <thead>
               <tr class="bg-[#2E2E2E]">
                 <th class="text-center p-3 border border-[#2E2E2E]">
@@ -178,13 +182,19 @@
         </section>
 
         <!-- Register-Register Instructions -->
-        <section>
+        <section class="panel p-6">
           <h2
-            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+            class="text-2xl font-bold mb-4 text-white"
           >
             Register-Register Instructions
           </h2>
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse [table-layout:fixed]">
+            <colgroup>
+              <col class="w-[10%]" />
+              <col class="w-[20%]" />
+              <col class="w-[20%]" />
+              <col class="w-[50%]" />
+            </colgroup>
             <thead>
               <tr class="bg-[#2E2E2E]">
                 <th class="text-center p-3 border border-[#2E2E2E]">
@@ -261,13 +271,19 @@
         </section>
 
         <!-- Jump Instructions -->
-        <section>
+        <section class="panel p-6">
           <h2
-            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+            class="text-2xl font-bold mb-4 text-white"
           >
             Jump Instructions
           </h2>
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse [table-layout:fixed]">
+            <colgroup>
+              <col class="w-[10%]" />
+              <col class="w-[20%]" />
+              <col class="w-[20%]" />
+              <col class="w-[50%]" />
+            </colgroup>
             <thead>
               <tr class="bg-[#2E2E2E]">
                 <th class="text-center p-3 border border-[#2E2E2E]">
@@ -324,13 +340,19 @@
         </section>
 
         <!-- Data Declaration Instructions -->
-        <section>
+        <section class="panel p-6">
           <h2
-            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+            class="text-2xl font-bold mb-4 text-white"
           >
             Data Declaration Instructions
           </h2>
-          <table class="w-full border-collapse">
+          <table class="w-full border-collapse [table-layout:fixed]">
+            <colgroup>
+              <col class="w-[10%]" />
+              <col class="w-[20%]" />
+              <col class="w-[20%]" />
+              <col class="w-[50%]" />
+            </colgroup>
             <thead>
               <tr class="bg-[#2E2E2E]">
                 <th class="text-center p-3 border border-[#2E2E2E]">
@@ -398,13 +420,13 @@
         </section>
 
         <!-- Addressing Modes -->
-        <section>
+        <section class="panel p-6">
           <h2
-            class="text-2xl font-bold mb-4 text-white border-b border-[#2E2E2E] pb-2"
+            class="text-2xl font-bold mb-4 text-white"
           >
             Addressing Modes
           </h2>
-          <div class="bg-[#1A1A1A] p-4 border border-[#2E2E2E]">
+          <div>
             <h3 class="text-lg font-bold mb-3">Memory Address Formats:</h3>
             <ul class="space-y-2 ml-4">
               <li>
