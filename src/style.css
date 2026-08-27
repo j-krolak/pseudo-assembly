@@ -21,6 +21,23 @@
   font-family: 'Courier New', Courier, monospace;
 }
 
+.dropdown {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid currentColor;
+  background-color: #000;
+  color: inherit;
+  height: 100%;
+}
+
+.dropdown:hover {
+  background-color: #fff;
+  color: #000;
+}
+
+.dropdown:active {
+  background-color: #fff;
+}
+
 .byte-record {
   display: flex;
 }

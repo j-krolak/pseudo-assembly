@@ -24,6 +24,16 @@ const memoryDiv = document.getElementById('memory');
 const codeDiv = document.getElementById('code') as Element;
 const errorsDiv = document.getElementById('errors') as HTMLDivElement;
 const selectElement = document.getElementById('examples-select');
+const registersFormatSelect = document.getElementById(
+  'registers-format',
+) as HTMLSelectElement;
+const memoryFormatSelect = document.getElementById(
+  'memory-format',
+) as HTMLSelectElement;
+
+type DisplayNumberFormat = 'bin' | 'hex';
+let registersFormat: DisplayNumberFormat = 'bin';
+let memoryFormat: DisplayNumberFormat = 'bin';
 
 // CodeMirror
 let executingLineByLine = false;
@@ -213,6 +223,16 @@ const displayState = () => {
   memoryDiv?.replaceChildren(...createMemoryDiv(interpreter.bytes));
 };
 
+registersFormatSelect?.addEventListener('change', (e: Event) => {
+  registersFormat = (e.target as HTMLSelectElement).value as DisplayNumberFormat;
+  displayState();
+});
+
+memoryFormatSelect?.addEventListener('change', (e: Event) => {
+  memoryFormat = (e.target as HTMLSelectElement).value as DisplayNumberFormat;
+  displayState();
+});
+
 const createRegistersNodes = (registers: Int32Array): Node[] => {
   const registersHTML: Node[] = [];
   registers.forEach((register, i) => {
@@ -223,12 +243,16 @@ const createRegistersNodes = (registers: Int32Array): Node[] => {
     const registerName = 'R' + i.toString();
     registerData.innerHTML = registerName + (i < 10 ? '&nbsp;' : '');
 
+    const formattedValue =
+      registersFormat === 'hex'
+        ? '0x' + (register >>> 0).toString(16).padStart(8, '0')
+        : '0b' + (register >>> 0).toString(2).padStart(32, '0');
+    const emptyPrefix = registersFormat === 'hex' ? ' 0x' : ' 0b';
+    const emptyWidth = registersFormat === 'hex' ? 11 : 35;
+
     registerData.innerHTML += interpreter.isRegisterInitialized[i]
-      ? ' 0b' +
-        (register >>> 0).toString(2).padStart(32, '0') +
-        ' ' +
-        register.toString()
-      : ' 0b'.padEnd(35, '~');
+      ? ' ' + formattedValue + ' ' + register.toString()
+      : emptyPrefix.padEnd(emptyWidth, '~');
 
     registerHTML.appendChild(registerData);
     registersHTML.push(registerHTML);
@@ -238,6 +262,7 @@ const createRegistersNodes = (registers: Int32Array): Node[] => {
 
 const createMemoryDiv = (bytes: byte[]): Node[] => {
   const memoryNodes: Node[] = [];
+  const width = memoryFormat === 'hex' ? 2 : 8;
   for (let i = 0; i < bytes.length; i += 4) {
     const record = document.createElement('div');
     record.className = 'byte-record';
@@ -245,7 +270,7 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
     for (let j = i; j < i + 4; j += 1) {
       const byteHTML = document.createElement('div');
       if (j >= interpreter.bytes.length) {
-        byteHTML.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;';
+        byteHTML.innerHTML = '&nbsp;'.repeat(width);
         record.appendChild(byteHTML);
         continue;
       }
@@ -264,15 +289,18 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
       const byte = bytes[j];
       switch (byte.type) {
         case 'DATA':
-          byteHTML.innerHTML = byte.val.toString(2).padStart(8, '0');
+          byteHTML.innerHTML =
+            memoryFormat === 'hex'
+              ? byte.val.toString(16).padStart(2, '0')
+              : byte.val.toString(2).padStart(8, '0');
 
           break;
 
         case 'INSTRUCTION':
-          byteHTML.innerHTML = 'xxxxxxxx';
+          byteHTML.innerHTML = 'x'.repeat(width);
           break;
         case 'DATA_HIDDEN':
-          byteHTML.innerHTML = '~~~~~~~~';
+          byteHTML.innerHTML = '~'.repeat(width);
       }
 
       record.appendChild(byteHTML);

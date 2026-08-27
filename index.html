@@ -41,6 +41,13 @@
 
       <div id="app" class="relative z-10 flex xl:flex-row flex-col gap-4">
         <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
+          <div class="flex items-center gap-2 mb-2">
+            <label>Format</label>
+            <select id="registers-format" class="dropdown">
+              <option value="bin">Binary</option>
+              <option value="hex">Hex</option>
+            </select>
+          </div>
           <div id="registers"></div>
         </div>
         <div
@@ -53,10 +60,7 @@
             <div class="flex justify-between">
               <div class="flex items-center gap-2">
                 <label> Examples</label>
-                <select
-                  id="examples-select"
-                  class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white h-full"
-                ></select>
+                <select id="examples-select" class="dropdown"></select>
               </div>
               <div class="flex justify-end gap-2">
                 <button
@@ -76,6 +80,13 @@
           </div>
         </div>
         <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
+          <div class="flex items-center gap-2 mb-2">
+            <label>Format</label>
+            <select id="memory-format" class="dropdown">
+              <option value="bin">Binary</option>
+              <option value="hex">Hex</option>
+            </select>
+          </div>
           <div id="memory"></div>
         </div>
       </div>
