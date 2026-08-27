@@ -12,6 +12,7 @@ import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup, EditorView } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
 import { examples } from './examples';
+import { createDropdown } from './dropdown';
 
 // Local storage keys
 const CODE_LS_KEY = 'code';
@@ -23,13 +24,9 @@ const registersDiv = document.getElementById('registers');
 const memoryDiv = document.getElementById('memory');
 const codeDiv = document.getElementById('code') as Element;
 const errorsDiv = document.getElementById('errors') as HTMLDivElement;
-const selectElement = document.getElementById('examples-select');
-const registersFormatSelect = document.getElementById(
-  'registers-format',
-) as HTMLSelectElement;
-const memoryFormatSelect = document.getElementById(
-  'memory-format',
-) as HTMLSelectElement;
+const examplesDropdown = document.getElementById('examples-select');
+const registersFormatDropdown = document.getElementById('registers-format');
+const memoryFormatDropdown = document.getElementById('memory-format');
 
 type DisplayNumberFormat = 'bin' | 'hex';
 let registersFormat: DisplayNumberFormat = 'bin';
@@ -147,7 +144,7 @@ const resetInterpreter = () => {
   });
   removeHighlight(view);
 
-  nextBtn.innerHTML = 'Run line by line';
+  nextBtn.innerHTML = 'run line by line';
 };
 
 nextBtn?.addEventListener('click', () => {
@@ -164,7 +161,7 @@ nextBtn?.addEventListener('click', () => {
           EditorView.editable.of(false),
         ]),
       });
-      nextBtn.innerHTML = 'Next line';
+      nextBtn.innerHTML = 'next line';
 
       displayState();
     } catch (error) {
@@ -223,15 +220,35 @@ const displayState = () => {
   memoryDiv?.replaceChildren(...createMemoryDiv(interpreter.bytes));
 };
 
-registersFormatSelect?.addEventListener('change', (e: Event) => {
-  registersFormat = (e.target as HTMLSelectElement).value as DisplayNumberFormat;
-  displayState();
-});
+if (registersFormatDropdown) {
+  createDropdown(
+    registersFormatDropdown,
+    [
+      { value: 'bin', label: 'binary' },
+      { value: 'hex', label: 'hex' },
+    ],
+    registersFormat,
+    (value) => {
+      registersFormat = value as DisplayNumberFormat;
+      displayState();
+    },
+  );
+}
 
-memoryFormatSelect?.addEventListener('change', (e: Event) => {
-  memoryFormat = (e.target as HTMLSelectElement).value as DisplayNumberFormat;
-  displayState();
-});
+if (memoryFormatDropdown) {
+  createDropdown(
+    memoryFormatDropdown,
+    [
+      { value: 'bin', label: 'binary' },
+      { value: 'hex', label: 'hex' },
+    ],
+    memoryFormat,
+    (value) => {
+      memoryFormat = value as DisplayNumberFormat;
+      displayState();
+    },
+  );
+}
 
 const createRegistersNodes = (registers: Int32Array): Node[] => {
   const registersHTML: Node[] = [];
@@ -324,19 +341,17 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
 };
 displayState();
 
-const initSelectElement = () => {
-  examples.map(({ name }, i) => {
-    const option = document.createElement('option');
-    option.innerHTML = name;
-    option.value = i.toString();
-    selectElement?.appendChild(option);
-  });
-
-  selectElement?.addEventListener('change', (e: Event) => {
-    const target = e.target as HTMLSelectElement;
-    const code = examples[Number(target.value)].code;
-    loadCode(view, code);
-  });
+const initExamplesDropdown = () => {
+  if (!examplesDropdown) return;
+  createDropdown(
+    examplesDropdown,
+    examples.map(({ name }, i) => ({ value: i.toString(), label: name })),
+    '0',
+    (value) => {
+      const code = examples[Number(value)].code;
+      loadCode(view, code);
+    },
+  );
 };
 
-initSelectElement();
+initExamplesDropdown();
