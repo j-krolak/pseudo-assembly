@@ -36,7 +36,6 @@ class TutorialManager {
   constructor() {
     this.initializeEditors();
     this.setupEventListeners();
-    this.updateStepIndicator();
   }
 
   private initializeEditors() {
@@ -63,11 +62,13 @@ class TutorialManager {
 
   private setupEventListeners() {
     // Navigation buttons
-    const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
-    const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+    document.querySelectorAll('.prev-step').forEach((btn) => {
+      btn.addEventListener('click', () => this.previousStep());
+    });
 
-    prevBtn?.addEventListener('click', () => this.previousStep());
-    nextBtn?.addEventListener('click', () => this.nextStep());
+    document.querySelectorAll('.next-step').forEach((btn) => {
+      btn.addEventListener('click', () => this.nextStep());
+    });
 
     // Load example buttons
     document.querySelectorAll('.load-example').forEach((btn) => {
@@ -102,35 +103,6 @@ class TutorialManager {
     }
 
     this.currentStep = stepNumber;
-    this.updateStepIndicator();
-    this.updateNavigationButtons();
-  }
-
-  private updateStepIndicator() {
-    const indicator = document.getElementById('step-indicator');
-    if (indicator) {
-      indicator.textContent = `Step ${this.currentStep} of ${this.totalSteps}`;
-    }
-  }
-
-  private updateNavigationButtons() {
-    const prevBtn = document.getElementById('prev-btn') as HTMLButtonElement;
-    const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
-
-    if (prevBtn) {
-      prevBtn.disabled = this.currentStep === 1;
-    }
-
-    if (nextBtn) {
-      nextBtn.style.display =
-        this.currentStep === this.totalSteps ? 'none' : 'block';
-    }
-
-    const completionMessage = document.getElementById('completion-message');
-    if (completionMessage) {
-      completionMessage.style.display =
-        this.currentStep === this.totalSteps ? 'block' : 'none';
-    }
   }
 
   private nextStep() {
@@ -176,19 +148,8 @@ class TutorialManager {
 
       if (isCorrect) {
         feedbackElement.innerHTML = `<span class="text-green-400">✓ ${stepData.successMessage}</span>`;
-
-        if (step < this.totalSteps) {
-          setTimeout(() => {
-            const nextBtn = document.getElementById(
-              'next-btn',
-            ) as HTMLButtonElement;
-            if (nextBtn) {
-              nextBtn.click();
-            }
-          }, 2000);
-        }
       } else {
-        feedbackElement.innerHTML = `<span class="text-yellow-400">⚠ Code runs but doesn't match the expected solution pattern. Try again!</span>`;
+        feedbackElement.innerHTML = `<span class="text-yellow-400">! Code runs but doesn't match the expected solution pattern. Try again!</span>`;
       }
     } catch (error) {
       if (
