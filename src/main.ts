@@ -11,11 +11,13 @@ import { Decoration, EditorView as View, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup, EditorView } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
+import { vim } from '@replit/codemirror-vim';
 import { examples } from './examples';
 import { createDropdown } from './dropdown';
 
 // Local storage keys
 const CODE_LS_KEY = 'code';
+const VIM_MODE_LS_KEY = 'vimMode';
 
 // HTML elements
 const runBtn = document.getElementById('run-btn');
@@ -27,6 +29,9 @@ const errorsDiv = document.getElementById('errors') as HTMLDivElement;
 const examplesDropdown = document.getElementById('examples-select');
 const registersFormatDropdown = document.getElementById('registers-format');
 const memoryFormatDropdown = document.getElementById('memory-format');
+const vimModeToggle = document.getElementById(
+  'vim-mode-toggle',
+) as HTMLInputElement;
 
 type DisplayNumberFormat = 'bin' | 'hex';
 let registersFormat: DisplayNumberFormat = 'bin';
@@ -35,6 +40,8 @@ let memoryFormat: DisplayNumberFormat = 'bin';
 // CodeMirror
 let executingLineByLine = false;
 const editableCompartment = new Compartment();
+const vimCompartment = new Compartment();
+const vimModeEnabled = localStorage.getItem(VIM_MODE_LS_KEY) === 'true';
 
 const addLineHighlight = StateEffect.define();
 const removeLineHighlight = StateEffect.define();
@@ -104,12 +111,35 @@ const blackBackground = EditorView.theme(
   { dark: true },
 );
 
+// Vim mode draws its own "fat" block cursor instead of the thin caret above,
+// with its own (pink) default color that needs !important to override.
+const vimCursorTheme = EditorView.theme({
+  '.cm-fat-cursor': {
+    background: '#44aa00ff !important',
+  },
+  '&:not(.cm-focused) .cm-fat-cursor': {
+    background: 'none',
+    outline: 'solid 1px #44aa00ff !important',
+  },
+});
+
 const loadCode = (view: View, code: string) => {
   localStorage.setItem(CODE_LS_KEY, code);
   view.dispatch({
     changes: { from: 0, to: view.state.doc.length, insert: code },
   });
 };
+
+// Keeps the cursor from scrolling underneath the sticky bars above and below
+// the editor when CodeMirror auto-scrolls to reveal it.
+const editorToolbarScrollMargin = EditorView.scrollMargins.of(() => {
+  const toolbar = document.getElementById('editor-toolbar');
+  const bottomBar = document.getElementById('editor-bottom-bar');
+  return {
+    top: toolbar?.getBoundingClientRect().height,
+    bottom: bottomBar?.getBoundingClientRect().height,
+  };
+});
 
 let initialCode = examples[0].code;
 const item = localStorage.getItem(CODE_LS_KEY);
@@ -119,6 +149,7 @@ if (item) {
 let state = EditorState.create({
   doc: initialCode,
   extensions: [
+    vimCompartment.of(vimModeEnabled ? [vim(), vimCursorTheme] : []),
     keymap.of(defaultKeymap),
     basicSetup,
     editableCompartment.of([EditorView.editable.of(!executingLineByLine)]),
@@ -126,6 +157,7 @@ let state = EditorState.create({
     lineHighlightField,
     blackBackground,
     persistOnChange,
+    editorToolbarScrollMargin,
   ],
 });
 
@@ -133,6 +165,17 @@ let view = new View({
   state: state,
   parent: codeDiv,
 });
+
+if (vimModeToggle) {
+  vimModeToggle.checked = vimModeEnabled;
+  vimModeToggle.addEventListener('change', () => {
+    const enabled = vimModeToggle.checked;
+    localStorage.setItem(VIM_MODE_LS_KEY, String(enabled));
+    view.dispatch({
+      effects: vimCompartment.reconfigure(enabled ? [vim(), vimCursorTheme] : []),
+    });
+  });
+}
 
 let interpreter = new Interpreter(view.state.doc.toString());
 

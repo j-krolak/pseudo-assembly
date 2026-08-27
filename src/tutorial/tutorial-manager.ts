@@ -1,10 +1,13 @@
 import { Interpreter, PreprocessingError, RuntimeError } from '../interpreter';
-import { EditorState } from '@codemirror/state';
+import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { defaultKeymap } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
+import { vim } from '@replit/codemirror-vim';
 import { tutorialSteps, type TutorialStep } from './tutorial-steps';
+
+const VIM_MODE_LS_KEY = 'vimMode';
 
 const tutorialTheme = EditorView.theme(
   {
@@ -24,6 +27,13 @@ const tutorialTheme = EditorView.theme(
     '.cm-editor': {
       border: '1px solid #2E2E2E',
     },
+    '.cm-fat-cursor': {
+      background: '#44aa00ff !important',
+    },
+    '&:not(.cm-focused) .cm-fat-cursor': {
+      background: 'none',
+      outline: 'solid 1px #44aa00ff !important',
+    },
   },
   { dark: true },
 );
@@ -31,6 +41,7 @@ const tutorialTheme = EditorView.theme(
 class TutorialManager {
   private currentStep: number = 1;
   private editors: { [key: number]: EditorView } = {};
+  private vimCompartments: { [key: number]: Compartment } = {};
   private readonly totalSteps = 6;
 
   constructor() {
@@ -39,12 +50,18 @@ class TutorialManager {
   }
 
   private initializeEditors() {
+    const vimModeEnabled = localStorage.getItem(VIM_MODE_LS_KEY) === 'true';
+
     for (let i = 1; i <= this.totalSteps; i++) {
       const editorElement = document.getElementById(`tutorial-editor-${i}`);
       if (editorElement) {
+        const vimCompartment = new Compartment();
+        this.vimCompartments[i] = vimCompartment;
+
         const state = EditorState.create({
           doc: '',
           extensions: [
+            vimCompartment.of(vimModeEnabled ? [vim()] : []),
             keymap.of(defaultKeymap),
             basicSetup,
             boysAndGirls,
@@ -83,6 +100,25 @@ class TutorialManager {
       btn.addEventListener('click', (e) => {
         const step = parseInt((e.target as HTMLElement).dataset.step || '1');
         this.checkAnswer(step);
+      });
+    });
+
+    // Vim mode toggles (shared across every editor)
+    const vimToggles = document.querySelectorAll<HTMLInputElement>(
+      '.vim-toggle',
+    );
+    const vimModeEnabled = localStorage.getItem(VIM_MODE_LS_KEY) === 'true';
+    vimToggles.forEach((toggle) => {
+      toggle.checked = vimModeEnabled;
+      toggle.addEventListener('change', () => {
+        const enabled = toggle.checked;
+        localStorage.setItem(VIM_MODE_LS_KEY, String(enabled));
+        vimToggles.forEach((t) => (t.checked = enabled));
+        Object.entries(this.vimCompartments).forEach(([step, compartment]) => {
+          this.editors[Number(step)]?.dispatch({
+            effects: compartment.reconfigure(enabled ? [vim()] : []),
+          });
+        });
       });
     });
   }

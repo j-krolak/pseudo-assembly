@@ -58,14 +58,28 @@
         >
           <div>
             <div
-              class="flex items-center justify-end gap-2 mb-1 sticky top-0 bg-black z-10 pt-4 pb-1"
+              id="editor-toolbar"
+              class="flex items-center justify-between gap-2 mb-1 sticky top-0 bg-black z-10 pt-4 pb-1"
             >
-              <label> examples</label>
-              <div id="examples-select" class="dropdown"></div>
+              <label class="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="vim-mode-toggle"
+                  class="vim-checkbox"
+                />
+                vim
+              </label>
+              <div class="flex items-center gap-2">
+                <label> examples</label>
+                <div id="examples-select" class="dropdown"></div>
+              </div>
             </div>
             <div id="code"></div>
           </div>
-          <div class="flex gap-4 flex-col sticky bottom-0 bg-black pt-2 pb-4">
+          <div
+            id="editor-bottom-bar"
+            class="flex gap-4 flex-col sticky bottom-0 bg-black pt-2 pb-4"
+          >
             <div id="errors" class="text-red-500"></div>
             <div class="flex justify-end gap-2">
               <button
