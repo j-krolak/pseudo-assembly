@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -40,54 +40,60 @@
       ></div>
 
       <div id="app" class="relative z-10 flex xl:flex-row flex-col gap-4">
-        <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
-          <div class="flex items-center gap-2 mb-2">
-            <label>Format</label>
-            <select id="registers-format" class="dropdown">
-              <option value="bin">Binary</option>
-              <option value="hex">Hex</option>
-            </select>
+        <div
+          class="panel flex-1 px-4 flex flex-col"
+        >
+          <div
+            class="flex justify-end mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
+          >
+            <div id="registers-format" class="dropdown"></div>
           </div>
-          <div id="registers"></div>
+          <div class="flex-1 flex justify-center items-center">
+            <div id="registers"></div>
+          </div>
         </div>
         <div
           id="code-editor"
-          class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]"
+          class="panel flex-1 px-4"
         >
-          <div id="code"></div>
-          <div class="flex gap-4 flex-col">
+          <div>
+            <div
+              class="flex items-center justify-end gap-2 mb-1 sticky top-0 bg-black z-10 pt-4 pb-1"
+            >
+              <label> examples</label>
+              <div id="examples-select" class="dropdown"></div>
+            </div>
+            <div id="code"></div>
+          </div>
+          <div class="flex gap-4 flex-col sticky bottom-0 bg-black pt-2 pb-4">
             <div id="errors" class="text-red-500"></div>
-            <div class="flex justify-between">
-              <div class="flex items-center gap-2">
-                <label> Examples</label>
-                <select id="examples-select" class="dropdown"></select>
-              </div>
-              <div class="flex justify-end gap-2">
-                <button
-                  id="next-btn"
-                  class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white active:bg-"
-                >
-                  Run line by line
-                </button>
-                <button
-                  id="run-btn"
-                  class="px-2 py-1 border bg-black hover:bg-white hover:text-black"
-                >
-                  Run
-                </button>
-              </div>
+            <div class="flex justify-end gap-2">
+              <button
+                id="next-btn"
+                class="px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white active:bg-"
+              >
+                run line by line
+              </button>
+              <button
+                id="run-btn"
+                class="px-2 py-1 border bg-black hover:bg-white hover:text-black"
+              >
+                run
+              </button>
             </div>
           </div>
         </div>
-        <div class="bg-black flex-1 p-4 border-2 border-[#2E2E2E]">
-          <div class="flex items-center gap-2 mb-2">
-            <label>Format</label>
-            <select id="memory-format" class="dropdown">
-              <option value="bin">Binary</option>
-              <option value="hex">Hex</option>
-            </select>
+        <div
+          class="panel flex-1 pb-4 px-4 flex flex-col"
+        >
+          <div
+            class="flex justify-end mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
+          >
+            <div id="memory-format" class="dropdown"></div>
           </div>
-          <div id="memory"></div>
+          <div class="flex-1 flex justify-center items-center">
+            <div id="memory"></div>
+          </div>
         </div>
       </div>
     </div>

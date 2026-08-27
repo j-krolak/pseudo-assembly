@@ -3,7 +3,7 @@ export const examples: {
   code: string;
 }[] = [
   {
-    name: 'SUM VECTOR',
+    name: 'sum vector',
     code: `VECTOR DC 20*INTEGER(2)
 VECTOR_LEN DC INTEGER(20)
 
@@ -28,7 +28,7 @@ END ST 2,SUM
     `,
   },
   {
-    name: 'GCD',
+    name: 'gcd',
     code: `ZERO DC INTEGER(0)
 A DC INTEGER(7)
 B DC INTEGER(3)
@@ -54,7 +54,7 @@ J START
 END ST 0, RES `,
   },
   {
-    name: 'PALINDROM',
+    name: 'palindrom',
     code: `ONE DC INTEGER(1)
 FOUR DC INTEGER(4)
 
@@ -90,7 +90,7 @@ END SR 1,1
     `,
   },
   {
-    name: 'BUBBLE SORT',
+    name: 'bubble sort',
     code: `JEDEN DC INTEGER(1)
 CZTERY DC INTEGER(4)
 
@@ -130,7 +130,7 @@ JP START
     `,
   },
   {
-    name: 'MERGE SORT JOIN',
+    name: 'merge sort join',
     code: `M DC INTEGER(2)
 A DC INTEGER(1)
 DC INTEGER(2)

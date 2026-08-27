@@ -3,6 +3,11 @@
   color: white;
 }
 
+.panel {
+  background-color: #000;
+  border: 2px solid #2e2e2e;
+}
+
 #registers {
   font-family: 'Courier New', Courier, monospace;
   display: flex;
@@ -19,23 +24,83 @@
 
 #memory {
   font-family: 'Courier New', Courier, monospace;
+  display: flex;
+  flex-direction: column;
 }
 
 .dropdown {
-  padding: 0.25rem 0.5rem;
-  border: 1px solid currentColor;
-  background-color: #000;
-  color: inherit;
+  position: relative;
+  display: inline-block;
   height: 100%;
 }
 
-.dropdown:hover {
+.dropdown-toggle {
+  box-sizing: border-box;
+  margin: 0;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: left;
+  white-space: nowrap;
+  padding: 0.25rem 0.5rem;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background-color: #000;
+  color: inherit;
+  height: 100%;
+  width: 100%;
+  cursor: pointer;
+}
+
+.dropdown-toggle:focus {
+  outline: none;
+}
+
+.dropdown.open .dropdown-toggle {
+  background-color: #000;
+  color: #fff;
+  border-color: #44aa00ff;
+  border-bottom-color: transparent;
+}
+
+.dropdown-toggle:hover,
+.dropdown-toggle:active {
   background-color: #fff;
   color: #000;
 }
 
-.dropdown:active {
-  background-color: #fff;
+.dropdown-menu {
+  box-sizing: border-box;
+  margin: 0;
+  margin-top: -1px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  min-width: 100%;
+  background-color: #000;
+  color: #fff;
+  border: 1px solid #44aa00ff;
+  border-top: none;
+  z-index: 20;
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dropdown.open .dropdown-menu {
+  visibility: visible;
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.dropdown-item {
+  font-family: 'Courier New', Courier, monospace;
+  padding: 0.25rem 0.5rem;
+  white-space: nowrap;
+  cursor: pointer;
+  color: #fff;
+}
+
+.dropdown-item:hover {
+  color: #44aa00ff;
 }
 
 .byte-record {
@@ -76,14 +141,17 @@
 
 .tutorial-editor-container {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 .tutorial-editor {
   min-height: 120px;
-  border: 1px solid #2e2e2e;
 }
 
 .feedback {
+  margin-top: auto;
   min-height: 1.25rem;
   padding: 0.25rem;
 }
