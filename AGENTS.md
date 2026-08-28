@@ -49,3 +49,4 @@ This classifier used to be duplicated between the highlighter and the aligner an
 
 - `tsconfig.json` has `erasableSyntaxOnly: true`, which rejects TS parameter-property shorthand (`constructor(readonly x: number)`) — declare the field separately and assign it in the constructor body instead.
 - `noUnusedLocals`/`noUnusedParameters` are on; `tsc --noEmit` will fail on dead destructured bindings, not just unused top-level vars.
+- The pseudo-assembly language itself supports `#` line comments (see `Interpreter.removeComments`), but this is an editor-only extension, not part of the language taught in the lectures — call this out when a comment is user-visible (e.g. `docs.html`), and keep comment lines in example/tutorial code narrow (~46 chars) so they read as short annotations, not prose.
