@@ -36,7 +36,7 @@ export type byte = {
   type: byteType;
 };
 
-const FLAGS = {
+export const FLAGS = {
   ZF: 6,
   SF: 7,
 };
