@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pseudo assembly</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-Dd9b45-L.css">
+    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-45ePYWjs.css">
   </head>
   <body class="font-mono">
     <nav
@@ -60,6 +60,14 @@
               declaration instructions, all implemented with a big-endian memory
               model.
             </p>
+            <div class="mt-4 p-4 bg-[#2E2E2E] text-sm text-gray-400">
+              <strong class="text-white">Note:</strong> This editor also
+              supports line comments starting with
+              <code class="font-mono text-[#44aa00ff]">#</code>. Comments are
+              a feature of this editor only - they are not part of the
+              language taught in the lectures, so they will likely not be
+              accepted on written exams.
+            </div>
           </div>
         </section>
 
@@ -90,89 +98,65 @@
             </thead>
             <tbody>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">A</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  A &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  A 1, LABEL
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">A</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">A</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">A</span> 1, LABEL</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Add memory value to register.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">S</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  S &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">S 2, 100</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">S</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">S</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">S</span> 2, 100</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Subtract memory value from register.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">M</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  M &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  M 3, VALUE
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">M</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">M</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">M</span> 3, VALUE</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Multiply register by memory value.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">D</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  D &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">D 1, 0(2)</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">D</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">D</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">D</span> 1, 0(2)</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Integer divide register by memory value.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">C</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  C &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">C 5, END</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">C</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">C</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">C</span> 5, END</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Compare register with memory value.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">L</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  L &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">L 0, DATA</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">L</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">L</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">L</span> 0, DATA</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Load memory value into register.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">ST</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  ST &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  ST 4, RESULT
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">ST</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">ST</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">ST</span> 4, RESULT</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Store register value to memory.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">LA</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  LA &lt;reg&gt;, &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  LA 6, ARRAY
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">LA</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">LA</span> &lt;reg&gt;, &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">LA</span> 6, ARRAY</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Load address into register.
                 </td>
@@ -209,59 +193,47 @@
             </thead>
             <tbody>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">AR</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  AR &lt;reg1&gt;, &lt;reg2&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">AR 1, 2</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">AR</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">AR</span> &lt;reg1&gt;, &lt;reg2&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">AR</span> 1, 2</td>
                 <td class="p-3 border border-[#2E2E2E]">Add reg2 to reg1.</td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">SR</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  SR &lt;reg1&gt;, &lt;reg2&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">SR 3, 1</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">SR</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">SR</span> &lt;reg1&gt;, &lt;reg2&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">SR</span> 3, 1</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Subtract reg2 from reg1.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">MR</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  MR &lt;reg1&gt;, &lt;reg2&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">MR 0, 4</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">MR</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">MR</span> &lt;reg1&gt;, &lt;reg2&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">MR</span> 0, 4</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Multiply reg1 by reg2.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">DR</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DR &lt;reg1&gt;, &lt;reg2&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">DR 5, 2</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">DR</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DR</span> &lt;reg1&gt;, &lt;reg2&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DR</span> 5, 2</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Integer divide reg1 by reg2.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">CR</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  CR &lt;reg1&gt;, &lt;reg2&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">CR 1, 0</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">CR</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">CR</span> &lt;reg1&gt;, &lt;reg2&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">CR</span> 1, 0</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Compare reg1 with reg2.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">LR</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  LR &lt;reg1&gt;, &lt;reg2&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">LR 3, 7</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">LR</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">LR</span> &lt;reg1&gt;, &lt;reg2&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">LR</span> 3, 7</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Load reg2 value into reg1.
                 </td>
@@ -298,41 +270,29 @@
             </thead>
             <tbody>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">J</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  J &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">J LOOP</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">J</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">J</span> &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">J</span> LOOP</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Unconditional jump to address.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">JP</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  JP &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  JP POSITIVE
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">JP</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">JP</span> &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">JP</span> POSITIVE</td>
                 <td class="p-3 border border-[#2E2E2E]">Jump if positive</td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">JN</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  JN &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  JN NEGATIVE
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">JN</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">JN</span> &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">JN</span> NEGATIVE</td>
                 <td class="p-3 border border-[#2E2E2E]">Jump if negative</td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">JZ</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  JZ &lt;addr&gt;
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">JZ ZERO</td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">JZ</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">JZ</span> &lt;addr&gt;</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">JZ</span> ZERO</td>
                 <td class="p-3 border border-[#2E2E2E]">Jump if zero</td>
               </tr>
             </tbody>
@@ -344,8 +304,17 @@
           <h2
             class="text-2xl font-bold mb-4 text-white"
           >
-            Data Declaration Instructions
+            Data Section (DC / DS)
           </h2>
+          <p class="text-gray-400 mb-4">
+            <code class="font-mono text-[#44aa00ff]">DC</code> and
+            <code class="font-mono text-[#44aa00ff]">DS</code> aren't
+            executable instructions - they're data declarations, like a
+            <code class="font-mono">.data</code> section in a real
+            assembler. All of them must come before any executable
+            instruction in the program; the interpreter rejects a DC/DS
+            that appears after one.
+          </p>
           <table class="w-full border-collapse [table-layout:fixed]">
             <colgroup>
               <col class="w-[10%]" />
@@ -367,50 +336,34 @@
             </thead>
             <tbody>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">DC</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DC INTEGER(&lt;value&gt;)
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DC INTEGER(2)
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">DC</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DC</span> <span class="text-[#00d8ff]">INTEGER</span>(&lt;value&gt;)</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DC</span> <span class="text-[#00d8ff]">INTEGER</span>(2)</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Define constant - allocates 4 bytes with initial value.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">DC</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DC &lt;count&gt;*INTEGER(&lt;value&gt;)
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DC 5*INTEGER(10)
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">DC</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DC</span> &lt;count&gt;*<span class="text-[#00d8ff]">INTEGER</span>(&lt;value&gt;)</td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DC</span> 5*<span class="text-[#00d8ff]">INTEGER</span>(10)</td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Define multiple constants - allocates count*4 bytes, all
                   initialized to &lt;value&gt;.
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">DS</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DS INTEGER
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DS INTEGER
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">DS</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DS</span> <span class="text-[#00d8ff]">INTEGER</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DS</span> <span class="text-[#00d8ff]">INTEGER</span></td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Define storage - allocates 4 bytes
                 </td>
               </tr>
               <tr>
-                <td class="p-3 border border-[#2E2E2E] font-bold">DS</td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DS &lt;count&gt;*INTEGER
-                </td>
-                <td class="p-3 border border-[#2E2E2E] font-mono">
-                  DS 10*INTEGER
-                </td>
+                <td class="p-3 border border-[#2E2E2E]"><span class="text-[#44aa00ff] font-bold">DS</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DS</span> &lt;count&gt;*<span class="text-[#00d8ff]">INTEGER</span></td>
+                <td class="p-3 border border-[#2E2E2E] font-mono"><span class="text-[#44aa00ff] font-bold">DS</span> 10*<span class="text-[#00d8ff]">INTEGER</span></td>
                 <td class="p-3 border border-[#2E2E2E]">
                   Define storage - allocates count*4 bytes
                 </td>
@@ -441,7 +394,7 @@
               </li>
             </ul>
 
-            <h3 class="text-lg font-bold mb-3 mt-6">Flags:</h3>
+            <h3 class="text-lg font-bold mb-3 mt-6">EFLAGS Register:</h3>
             <ul class="space-y-2 ml-4">
               <li>
                 <span class="font-mono">ZF (bit 6)</span> - Zero Flag: Set when
