@@ -1,7 +1,7 @@
 import { Interpreter, PreprocessingError, RuntimeError } from '../interpreter';
 import { Compartment, EditorState } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
-import { defaultKeymap } from '@codemirror/commands';
+import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
 import { boysAndGirls } from 'thememirror';
 import { vim } from '@replit/codemirror-vim';
@@ -62,7 +62,7 @@ class TutorialManager {
           doc: '',
           extensions: [
             vimCompartment.of(vimModeEnabled ? [vim()] : []),
-            keymap.of(defaultKeymap),
+            keymap.of([...defaultKeymap, indentWithTab]),
             basicSetup,
             boysAndGirls,
             tutorialTheme,
