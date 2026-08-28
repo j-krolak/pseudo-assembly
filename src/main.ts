@@ -1,10 +1,11 @@
-import { Interpreter, PreprocessingError } from './interpreter';
+import { FLAGS, Interpreter, PreprocessingError } from './interpreter';
 import { RuntimeError, type byte } from './interpreter';
 
 import {
   Compartment,
   EditorState,
   type Extension,
+  Prec,
   StateEffect,
   StateField,
 } from '@codemirror/state';
@@ -29,6 +30,8 @@ const CURRENT_FILE_LS_KEY = 'currentFile';
 // HTML elements
 const runBtn = document.getElementById('run-btn');
 const nextBtn = document.getElementById('next-btn') as HTMLButtonElement;
+const stopBtn = document.getElementById('stop-btn');
+const playBtn = document.getElementById('play-btn') as HTMLButtonElement | null;
 const registersDiv = document.getElementById('registers');
 const memoryDiv = document.getElementById('memory');
 const codeDiv = document.getElementById('code') as Element;
@@ -176,7 +179,7 @@ const createLineHighlighter = (color: string) => {
   return { field, highlight, clear };
 };
 
-const executionHighlighter = createLineHighlighter('#44aa00ff');
+const executionHighlighter = createLineHighlighter('rgba(37, 99, 235, 0.35)');
 const errorHighlighter = createLineHighlighter('rgba(170, 34, 34, 0.35)');
 
 const highlightError = (view: EditorView, error: RuntimeError | PreprocessingError) => {
@@ -201,24 +204,34 @@ const blackBackground = EditorView.theme(
   { dark: true },
 );
 
-// Vim mode draws its own "fat" block cursor instead of the thin caret above,
-// with its own (pink) default color that needs !important to override. Its
-// command-line panel also has no background of its own by default, letting
-// the page behind it show through.
-const vimCursorTheme = EditorView.theme({
-  '.cm-fat-cursor': {
-    background: '#44aa00ff !important',
-  },
-  '&:not(.cm-focused) .cm-fat-cursor': {
-    background: 'none',
-    outline: 'solid 1px #44aa00ff !important',
-  },
-  '.cm-vim-panel': {
-    backgroundColor: '#000 !important',
-    color: '#fff !important',
-    borderTop: '1px solid #2E2E2E',
-  },
-});
+// Vim mode draws its own "fat" block cursor in normal mode instead of the
+// thin caret above, with its own (pink) default color that needs
+// !important to override. In insert mode it falls back to that same thin
+// caret ("pipe") - keep that one at its normal (white) color rather than
+// the block cursor's green, so the two modes stay visually distinct.
+// Prec.highest guarantees this wins over blackBackground's `.cm-cursor`
+// rule regardless of extension order. Its command-line panel also has no
+// background of its own by default, letting the page behind it show
+// through.
+const vimCursorTheme = Prec.highest(
+  EditorView.theme({
+    '.cm-fat-cursor': {
+      background: '#44aa00ff !important',
+    },
+    '&:not(.cm-focused) .cm-fat-cursor': {
+      background: 'none',
+      outline: 'solid 1px #44aa00ff !important',
+    },
+    '.cm-cursor': {
+      borderLeftColor: '#fff !important',
+    },
+    '.cm-vim-panel': {
+      backgroundColor: '#000 !important',
+      color: '#fff !important',
+      borderTop: '1px solid #2E2E2E',
+    },
+  }),
+);
 
 const vimExtensions = [vim(), vimCursorTheme];
 
@@ -304,6 +317,40 @@ wireToggle(
 
 let interpreter = new Interpreter(view.state.doc.toString());
 
+// nextBtn's label switches between "run line by line" and "next line", but
+// its f10 shortcut hint span must survive that swap - plain innerHTML
+// assignment would otherwise wipe it out.
+const setNextBtnLabel = (label: string) => {
+  nextBtn.innerHTML = `${label} <span class="text-gray-500 group-hover:text-black">f10</span>`;
+};
+
+let autoPlayTimer: ReturnType<typeof setInterval> | null = null;
+
+const pauseAutoPlay = () => {
+  if (autoPlayTimer !== null) {
+    clearInterval(autoPlayTimer);
+    autoPlayTimer = null;
+  }
+  if (playBtn) playBtn.textContent = 'play';
+  stopBtn?.classList.remove('hidden');
+  nextBtn.classList.remove('hidden');
+};
+
+const startAutoPlay = () => {
+  if (playBtn) playBtn.textContent = 'stop';
+  stopBtn?.classList.add('hidden');
+  nextBtn.classList.add('hidden');
+  autoPlayTimer = setInterval(() => nextBtn.click(), 500);
+};
+
+playBtn?.addEventListener('click', () => {
+  if (autoPlayTimer !== null) {
+    pauseAutoPlay();
+  } else {
+    startAutoPlay();
+  }
+});
+
 const resetInterpreter = () => {
   interpreter.currentLine = 0;
   executingLineByLine = false;
@@ -312,7 +359,16 @@ const resetInterpreter = () => {
   });
   executionHighlighter.clear(view);
 
-  nextBtn.innerHTML = 'run line by line';
+  setNextBtnLabel('run line by line');
+  nextBtn.classList.remove('hidden');
+  stopBtn?.classList.add('hidden');
+  runBtn?.classList.remove('hidden');
+  playBtn?.classList.add('hidden');
+  if (autoPlayTimer !== null) {
+    clearInterval(autoPlayTimer);
+    autoPlayTimer = null;
+  }
+  if (playBtn) playBtn.textContent = 'play';
 };
 
 nextBtn?.addEventListener('click', () => {
@@ -330,7 +386,10 @@ nextBtn?.addEventListener('click', () => {
           EditorView.editable.of(false),
         ]),
       });
-      nextBtn.innerHTML = 'next line';
+      setNextBtnLabel('next line');
+      stopBtn?.classList.remove('hidden');
+      runBtn?.classList.add('hidden');
+      playBtn?.classList.remove('hidden');
 
       displayState();
     } catch (error) {
@@ -368,6 +427,13 @@ nextBtn?.addEventListener('click', () => {
 });
 
 runBtn?.addEventListener('click', async () => {
+  // Mid-step, "run" continues one line at a time instead of restarting the
+  // whole program from scratch.
+  if (executingLineByLine) {
+    nextBtn.click();
+    return;
+  }
+
   errorsDiv.innerHTML = '';
   errorHighlighter.clear(view);
   resetInterpreter();
@@ -387,11 +453,20 @@ runBtn?.addEventListener('click', async () => {
   }
 });
 
+stopBtn?.addEventListener('click', () => {
+  errorsDiv.innerHTML = '';
+  errorHighlighter.clear(view);
+  resetInterpreter();
+});
+
 // Match the run shortcuts used by Rider/VS Code/Visual Studio: F5 runs,
-// F10 steps line by line. Both keys have browser default actions (page
-// reload, menu-bar focus) that need to be suppressed.
+// F10 steps line by line, shift+F5 stops. Both keys have browser default
+// actions (page reload, menu-bar focus) that need to be suppressed.
 window.addEventListener('keydown', (event) => {
-  if (event.key === 'F5') {
+  if (event.key === 'F5' && event.shiftKey) {
+    event.preventDefault();
+    stopBtn?.click();
+  } else if (event.key === 'F5') {
     event.preventDefault();
     runBtn?.click();
   } else if (event.key === 'F10') {
@@ -401,7 +476,10 @@ window.addEventListener('keydown', (event) => {
 });
 
 const displayState = () => {
-  registersDiv?.replaceChildren(...createRegistersNodes(interpreter.registers));
+  registersDiv?.replaceChildren(
+    ...createFlagNodes(interpreter.eflags),
+    ...createRegistersNodes(interpreter.registers),
+  );
 
   memoryDiv?.replaceChildren(...createMemoryDiv(interpreter.bytes));
 };
@@ -436,6 +514,25 @@ if (memoryFormatDropdown) {
   );
 }
 
+const createFlagNodes = (eflags: number): Node[] => {
+  const zf = (eflags >> FLAGS.ZF) & 1;
+  const sf = (eflags >> FLAGS.SF) & 1;
+
+  const flagHTML = document.createElement('div');
+  flagHTML.className = 'register flex justify-between';
+
+  const label = document.createElement('div');
+  label.innerHTML = '<span class="register-name">EFLAGS</span>';
+
+  const values = document.createElement('div');
+  values.innerHTML =
+    `<span class="register-name">ZF</span> ${zf}  ` +
+    `<span class="register-name">SF</span> ${sf}`;
+
+  flagHTML.append(label, values);
+  return [flagHTML];
+};
+
 const createRegistersNodes = (registers: Int32Array): Node[] => {
   const registersHTML: Node[] = [];
   registers.forEach((register, i) => {
@@ -444,7 +541,9 @@ const createRegistersNodes = (registers: Int32Array): Node[] => {
 
     registerHTML.className = 'register';
     const registerName = 'R' + i.toString();
-    registerData.innerHTML = registerName + (i < 10 ? '&nbsp;' : '');
+    registerData.innerHTML =
+      `<span class="register-name">${registerName}</span>` +
+      (i < 10 ? '&nbsp;' : '');
 
     const formattedValue =
       registersFormat === 'hex'

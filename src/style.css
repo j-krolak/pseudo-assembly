@@ -151,8 +151,12 @@
   color: #44aa00ff;
 }
 
+.register-name {
+  color: #44aa00ff;
+}
+
 .current-memory {
-  background-color: #44aa00ff;
+  background-color: rgba(37, 99, 235, 0.35);
 }
 
 #code {

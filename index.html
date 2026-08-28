@@ -42,8 +42,9 @@
       <div id="app" class="relative z-10 flex xl:flex-row flex-col gap-4">
         <div class="panel flex-1 px-4 pb-4 flex flex-col">
           <div
-            class="flex justify-end mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
+            class="flex justify-between items-center mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
           >
+            <label>registers</label>
             <div id="registers-format" class="dropdown"></div>
           </div>
           <div class="flex-1 flex justify-center items-center">
@@ -96,6 +97,16 @@
             <div id="errors" class="text-red-500"></div>
             <div class="flex justify-end gap-2">
               <button
+                id="stop-btn"
+                title="stop (shift+F5)"
+                class="hidden group px-2 py-1 border bg-black hover:bg-white hover:text-black"
+              >
+                stop
+                <span class="text-gray-500 group-hover:text-black"
+                  >shift+f5</span
+                >
+              </button>
+              <button
                 id="next-btn"
                 title="run line by line (F10)"
                 class="group px-2 py-1 border bg-black hover:bg-white hover:text-black active:bg-white active:bg-"
@@ -110,13 +121,21 @@
               >
                 run <span class="text-gray-500 group-hover:text-black">f5</span>
               </button>
+              <button
+                id="play-btn"
+                title="auto-step through the program"
+                class="hidden group px-2 py-1 border bg-black hover:bg-white hover:text-black"
+              >
+                play
+              </button>
             </div>
           </div>
         </div>
         <div class="panel flex-1 pb-4 px-4 flex flex-col">
           <div
-            class="flex justify-end mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
+            class="flex justify-between items-center mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
           >
+            <label>memory</label>
             <div id="memory-format" class="dropdown"></div>
           </div>
           <div class="flex-1 flex justify-center items-center">
