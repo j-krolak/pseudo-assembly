@@ -53,16 +53,22 @@ type Label = {
 };
 
 export class PreprocessingError extends Error {
-  constructor(message: string) {
+  line?: number;
+
+  constructor(message: string, line?: number) {
     super(message);
     this.name = 'PreprocessingError';
+    this.line = line;
   }
 }
 
 export class RuntimeError extends Error {
-  constructor(message: string) {
+  line?: number;
+
+  constructor(message: string, line?: number) {
     super(message);
     this.name = 'RuntimeError';
+    this.line = line;
   }
 }
 class Interpreter {
@@ -94,6 +100,20 @@ class Interpreter {
     return this.statements.length <= this.currentLine;
   }
 
+  // Every error tied to a specific source line is reported the same way -
+  // "[Line N] ..." in the message (for display) plus a structured `line`
+  // field (so callers like the editor's error-line highlight don't have to
+  // parse it back out of the message).
+  preprocessingError(message: string): PreprocessingError {
+    const line = this.currentLine + 1;
+    return new PreprocessingError(`[Line ${line}] ${message}`, line);
+  }
+
+  runtimeError(message: string): RuntimeError {
+    const line = this.currentLine + 1;
+    return new RuntimeError(`[Line ${line}] ${message}`, line);
+  }
+
   interpret() {
     this.preprocess();
     while (!this.isAtEnd() && this.executedLines < MAX_LINES)
@@ -123,12 +143,12 @@ class Interpreter {
   }
 
   getNumberInParen(val: string): number {
-    const res = val.match(/-?\d+/);
-    if (val.length < 1) {
-      throw new PreprocessingError('there isnt number.');
+    const match = val.match(/^INTEGER\((-?\d+)\)$/);
+    if (!match) {
+      throw this.preprocessingError(`Expected "INTEGER(<value>)", got "${val}".`);
     }
 
-    return Number(res?.[0]);
+    return Number(match[1]);
   }
 
   bytesToNumber(bytes: byte[]): number {
@@ -168,18 +188,14 @@ class Interpreter {
       // Add label to environment
       if (tokens.length > 1 && keywords.includes(tokens[1])) {
         if (this.isLabelDefined(tokens[0])) {
-          throw new PreprocessingError(
-            `[Line ${this.currentLine + 1}] Label "${
-              tokens[0]
-            }" is defined more than once.`,
+          throw this.preprocessingError(
+            `Label "${tokens[0]}" is defined more than once.`,
           );
         }
 
         if (!this.isAlphaNumeric(tokens[0])) {
-          throw new PreprocessingError(
-            `[Line ${this.currentLine + 1}] Label "${
-              tokens[0]
-            }" name must be alpha numberic name.'`,
+          throw this.preprocessingError(
+            `Label "${tokens[0]}" name must be alpha numberic name.'`,
           );
         }
 
@@ -200,30 +216,22 @@ class Interpreter {
       }
 
       if (!keywords.includes(instruction)) {
-        throw new PreprocessingError(
-          `[Line ${
-            this.currentLine + 1
-          }] Unrecognized instruction name "${instruction}".`,
+        throw this.preprocessingError(
+          `Unrecognized instruction name "${instruction}".`,
         );
       }
 
       if (tokens.length <= currentIndex) {
-        throw new PreprocessingError(
-          `[Line ${
-            this.currentLine + 1
-          }] Data declarations (DC/DS) must specify a data type. Use format: LABEL DC INTEGER(value) or LABEL DS INTEGER`,
+        throw this.preprocessingError(
+          `Data declarations (DC/DS) must specify a data type. Use format: LABEL DC INTEGER(value) or LABEL DS INTEGER`,
         );
       }
 
       const args = tokens[currentIndex].split('*');
       if (instruction === 'DC' || instruction == 'DS') {
         if (!isDataSection) {
-          throw new PreprocessingError(
-            `[Line ${
-              this.currentLine + 1
-            }] Data declarations (labels with DC/DS) must precede executable instructions. Move label "${
-              tokens[0]
-            }" at the top of the program.`,
+          throw this.preprocessingError(
+            `Data declarations (labels with DC/DS) must precede executable instructions. Move label "${tokens[0]}" at the top of the program.`,
           );
         }
       } else {
@@ -255,7 +263,12 @@ class Interpreter {
         case 'DS':
           let numberOfMemoryCells = 4;
           if (args.length === 2) {
+            if (args[1] !== 'INTEGER') {
+              throw this.preprocessingError(`Expected "INTEGER", got "${args[1]}".`);
+            }
             numberOfMemoryCells = Number(args[0]) * 4;
+          } else if (args[0] !== 'INTEGER') {
+            throw this.preprocessingError(`Expected "INTEGER", got "${args[0]}".`);
           }
           this.bytes = [
             ...this.bytes,
@@ -319,9 +332,7 @@ class Interpreter {
     const label = this.labels.find((label) => label.label === param);
 
     if (label === undefined) {
-      throw new RuntimeError(
-        `[Line ${this.currentLine + 1}] There isn't defined label "${param}."`,
-      );
+      throw this.runtimeError(`There isn't defined label "${param}."`);
     }
 
     return label.address;
@@ -361,10 +372,8 @@ class Interpreter {
       }
 
       if (addr < stmtAddr) {
-        throw new RuntimeError(
-          `[Line ${
-            this.currentLine + 1
-          }] InvalidJumpTarget - attempted to jump to address 0x${addr
+        throw this.runtimeError(
+          `InvalidJumpTarget - attempted to jump to address 0x${addr
             .toString(16)
             .padStart(32, '0')}, which is not executable.`,
         );
@@ -372,10 +381,8 @@ class Interpreter {
 
       stmtAddr += this.statements[i].byteSize;
     }
-    throw new RuntimeError(
-      `[Line ${
-        this.currentLine + 1
-      }] InvalidJumpTarget - attempted to jump to address 0x${addr
+    throw this.runtimeError(
+      `InvalidJumpTarget - attempted to jump to address 0x${addr
         .toString(16)
         .padStart(32, '0')}, which is not executable.`,
     );
@@ -416,19 +423,15 @@ class Interpreter {
       // Register-register instructions
       if (this.isInstructionRR(instruction)) {
         if (tokens.length - currentIndex != 3) {
-          throw new RuntimeError(
-            `[Line ${
-              this.currentLine + 1
-            }] To many argument for instruction "${instruction}" .`,
+          throw this.runtimeError(
+            `To many argument for instruction "${instruction}" .`,
           );
         }
         const r1 = Number(tokens[currentIndex]);
         currentIndex += 1;
         if (tokens[currentIndex] != ',') {
-          throw new RuntimeError(
-            `[Line ${
-              this.currentLine + 1
-            }] Expected "," between arguments of instruction ${instruction}.`,
+          throw this.runtimeError(
+            `Expected "," between arguments of instruction ${instruction}.`,
           );
         }
         currentIndex += 1;
@@ -467,19 +470,15 @@ class Interpreter {
       // Register-memory instructions
       if (this.isInstructionRM(instruction)) {
         if (tokens.length - currentIndex != 3) {
-          throw new RuntimeError(
-            `[Line ${
-              this.currentLine + 1
-            }] To many argument for instruction "${instruction}" .`,
+          throw this.runtimeError(
+            `To many argument for instruction "${instruction}" .`,
           );
         }
         const r1 = Number(tokens[currentIndex]);
         currentIndex += 1;
         if (tokens[currentIndex] != ',') {
-          throw new RuntimeError(
-            `[Line ${
-              this.currentLine + 1
-            }] Expected "," between arguments of instruction ${instruction}.`,
+          throw this.runtimeError(
+            `Expected "," between arguments of instruction ${instruction}.`,
           );
         }
         currentIndex += 1;
@@ -530,10 +529,8 @@ class Interpreter {
 
       if (instruction.length > 0 && instruction[0] === 'J') {
         if (tokens.length - currentIndex != 1) {
-          throw new RuntimeError(
-            `[Line ${
-              this.currentLine + 1
-            }] Instruction "${instruction}" accept only one argument "${instruction} <memmory address>".`,
+          throw this.runtimeError(
+            `Instruction "${instruction}" accept only one argument "${instruction} <memmory address>".`,
           );
         }
         const addr = this.getMemoryAddr(tokens[currentIndex]);
@@ -569,11 +566,7 @@ class Interpreter {
         }
       }
     } else {
-      throw new RuntimeError(
-        `[Line ${
-          this.currentLine + 1
-        }] Unrecognized instruction name "${instruction}".`,
-      );
+      throw this.runtimeError(`Unrecognized instruction name "${instruction}".`);
     }
     this.currentMemoryAddress += this.statements[this.currentLine].byteSize;
     this.currentLine += 1;
