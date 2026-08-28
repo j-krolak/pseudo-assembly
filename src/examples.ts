@@ -4,7 +4,8 @@ export const examples: {
 }[] = [
   {
     name: 'sum vector',
-    code: `VECTOR DC 20*INTEGER(2)
+    code: `# sum all elements of VECTOR
+VECTOR DC 20*INTEGER(2)
 VECTOR_LEN DC INTEGER(20)
 
 ONE DC INTEGER(1)
@@ -13,6 +14,7 @@ WORD_SIZE DC INTEGER(4)
 
 SUM DC INTEGER(0)
 
+# R0=ptr, R1=index, R2=sum
 LA 0, VECTOR
 SR 1, 1
 SR 2, 2
@@ -29,7 +31,8 @@ END ST 2,SUM
   },
   {
     name: 'gcd',
-    code: `ZERO DC INTEGER(0)
+    code: `# gcd(A, B) via subtraction
+# RES holds the result
 A DC INTEGER(7)
 B DC INTEGER(3)
 RES DS INTEGER
@@ -37,25 +40,23 @@ RES DS INTEGER
 L 0, A
 L 1, B
 
-START SR 0, 1
-CR 0, 1
+START CR 0, 1
 JZ END
+JN LESS
 
-L 3, ZERO
-AR 3, 0
-SR 3, 1
-
-JP START
-LR 3, 0
-LR 0, 1
-LR 1, 3
+SR 0, 1
 J START
 
-END ST 0, RES `,
+LESS SR 1, 0
+J START
+
+END ST 0, RES
+`,
   },
   {
     name: 'palindrom',
-    code: `ONE DC INTEGER(1)
+    code: `# is PA a palindrome? RES=1 if so
+ONE DC INTEGER(1)
 FOUR DC INTEGER(4)
 
 N DC INTEGER(3)
@@ -66,6 +67,7 @@ DC INTEGER(3)
 
 RES DC INTEGER(1)
 
+# R1=left ptr, R3=right ptr
 LA 1, PA
 L 3, N
 S 3, ONE
@@ -91,7 +93,8 @@ END SR 1,1
   },
   {
     name: 'bubble sort',
-    code: `JEDEN DC INTEGER(1)
+    code: `# bubble sort P (N elements) ascending
+JEDEN DC INTEGER(1)
 CZTERY DC INTEGER(4)
 
 N DC INTEGER(3)
@@ -100,6 +103,7 @@ P DC INTEGER(12)
 DC INTEGER(-4)
 DC INTEGER(8)
 
+# R7=P ptr, R1=inner idx, R2=pass limit
 LA 7, P
 
 L 1, JEDEN
@@ -131,7 +135,8 @@ JP START
   },
   {
     name: 'merge sort join',
-    code: `M DC INTEGER(2)
+    code: `# merge sorted arrays A, B into C
+M DC INTEGER(2)
 A DC INTEGER(1)
 DC INTEGER(2)
 
@@ -145,7 +150,8 @@ JEDEN DC INTEGER(1)
 L 1, JEDEN
 LR 2, 1
 
-LA 3, C 
+# R3=C ptr, R4=A ptr, R5=B ptr
+LA 3, C
 LA 4, A
 LA 5, B
 LR 8, 1
