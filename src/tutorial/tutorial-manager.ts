@@ -1,5 +1,5 @@
 import { Interpreter, PreprocessingError, RuntimeError } from '../interpreter';
-import { Compartment, EditorState } from '@codemirror/state';
+import { Compartment, EditorState, Prec } from '@codemirror/state';
 import { EditorView, keymap } from '@codemirror/view';
 import { defaultKeymap, indentWithTab } from '@codemirror/commands';
 import { basicSetup } from 'codemirror';
@@ -38,6 +38,20 @@ const tutorialTheme = EditorView.theme(
   { dark: true },
 );
 
+// Vim mode's insert-mode "pipe" caret falls back to the plain .cm-cursor
+// used above - keep it at its normal (white) color rather than the fat
+// block cursor's green, so the two modes stay visually distinct.
+// Prec.highest guarantees this wins over tutorialTheme's own rule.
+const vimCursorOverride = Prec.highest(
+  EditorView.theme({
+    '.cm-cursor': {
+      borderLeftColor: '#fff !important',
+    },
+  }),
+);
+
+const vimExtensions = [vim(), vimCursorOverride];
+
 class TutorialManager {
   private currentStep: number = 1;
   private editors: { [key: number]: EditorView } = {};
@@ -61,7 +75,7 @@ class TutorialManager {
         const state = EditorState.create({
           doc: '',
           extensions: [
-            vimCompartment.of(vimModeEnabled ? [vim()] : []),
+            vimCompartment.of(vimModeEnabled ? vimExtensions : []),
             keymap.of([...defaultKeymap, indentWithTab]),
             basicSetup,
             boysAndGirls,
@@ -116,7 +130,7 @@ class TutorialManager {
         vimToggles.forEach((t) => (t.checked = enabled));
         Object.entries(this.vimCompartments).forEach(([step, compartment]) => {
           this.editors[Number(step)]?.dispatch({
-            effects: compartment.reconfigure(enabled ? [vim()] : []),
+            effects: compartment.reconfigure(enabled ? vimExtensions : []),
           });
         });
       });
