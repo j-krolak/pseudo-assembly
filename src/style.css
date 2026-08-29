@@ -97,6 +97,12 @@
   font-family: 'Courier New', Courier, monospace;
   display: grid;
   column-gap: 0.75rem;
+  /* Binary format's wide byte columns can make the grid wider than the
+     panel - scroll within the panel instead of pushing the whole page
+     (and its own flex ancestors, which need min-w-0 to actually let this
+     shrink instead of growing to fit) wider than the viewport. */
+  overflow-x: auto;
+  max-width: 100%;
 }
 
 .dropdown {
@@ -237,6 +243,10 @@
 
 .byte-instruction-unused {
   color: #555;
+}
+
+.byte-unknown {
+  color: #aa4444;
 }
 
 .memory-label {
