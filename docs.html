@@ -751,6 +751,42 @@
                 label.
               </li>
             </ul>
+
+            <h3 class="text-lg font-bold mb-3 mt-6">Strict Mode:</h3>
+            <div class="mt-4 p-4 bg-[#2E2E2E] text-sm text-gray-400 mb-4">
+              <strong class="text-white">Note:</strong> Non-strict mode is
+              an extension of this interpreter only - it wasn't covered in
+              the lectures and won't be available on a written exam. Don't
+              rely on accessing memory outside the program's declared
+              <code class="font-mono">.data</code>/<code class="font-mono"
+                >.text</code
+              >, or on editing
+              <code class="font-mono">.text</code> while the program runs,
+              as a technique - it isn't something a real assembler for this
+              course supports.
+            </div>
+            <p class="ml-4">
+              The <span class="font-mono">strict</span> toggle in the
+              playground controls memory protection. Assume strict mode on
+              an exam. With it on (the default), reading or writing an
+              address outside
+              <code class="font-mono">.data</code>/<code class="font-mono"
+                >.text</code
+              >
+              throws a segmentation fault, and so does a
+              <span class="text-[#44aa00ff] font-bold">ST</span> targeting
+              <code class="font-mono">.text</code>.
+            </p>
+            <p class="ml-4 mt-2">
+              With it off, both restrictions are lifted: an out-of-bounds
+              address silently grows memory instead of faulting (shown as
+              <code class="font-mono">xx</code> in the memory panel until
+              something actually writes real data there), and
+              <span class="text-[#44aa00ff] font-bold">ST</span> can
+              overwrite <code class="font-mono">.text</code>. This exists
+              purely to let curious people poke at how memory-unsafe code
+              behaves, not as part of the language.
+            </p>
           </div>
         </section>
       </div>
