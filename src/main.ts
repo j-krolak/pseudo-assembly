@@ -66,6 +66,10 @@ let memoryView: MemoryView = memoryViewOptions.includes(
 
 // CodeMirror
 let executingLineByLine = false;
+// True after a full (non-line-by-line) run has finished - the run button
+// turns into a "reset" button so the registers/memory state left behind
+// can be cleared before running again. See setRunBtnLabel().
+let hasRunFully = false;
 const editableCompartment = new Compartment();
 
 // Each toggle below (vim mode, syntax highlighting, label alignment) is a
@@ -167,6 +171,12 @@ const syncMemoryWithEditor = EditorView.updateListener.of((update) => {
       // Mid-edit code is often invalid (e.g. an unfinished
       // "INTEGER(..."), so keep showing the last valid state rather than
       // clearing the panel on every keystroke.
+    }
+    // Editing already discards the previous run's state above, so the
+    // run button no longer needs to offer a reset.
+    if (hasRunFully) {
+      hasRunFully = false;
+      setRunBtnLabel('run');
     }
   }
 
@@ -411,6 +421,14 @@ const setNextBtnLabel = (label: string) => {
   nextBtn.innerHTML = `${label} <span class="text-gray-500 group-hover:text-black">f10</span>`;
 };
 
+// runBtn's label switches between "run" and "reset" (see hasRunFully) -
+// same innerHTML-survives-the-f5-hint-span concern as setNextBtnLabel.
+const setRunBtnLabel = (label: string) => {
+  if (!runBtn) return;
+  runBtn.innerHTML = `${label} <span class="text-gray-500 group-hover:text-black">f5</span>`;
+  runBtn.title = `${label} (F5)`;
+};
+
 let autoPlayTimer: ReturnType<typeof setInterval> | null = null;
 
 const pauseAutoPlay = () => {
@@ -456,6 +474,11 @@ const resetInterpreter = () => {
     autoPlayTimer = null;
   }
   if (playBtn) playBtn.textContent = 'play';
+
+  // Stepping/stopping starts from a fresh Interpreter, so any leftover
+  // state from an earlier full run no longer needs its own reset button.
+  hasRunFully = false;
+  setRunBtnLabel('run');
 };
 
 nextBtn?.addEventListener('click', () => {
@@ -523,12 +546,31 @@ runBtn?.addEventListener('click', async () => {
 
   errorsDiv.innerHTML = '';
   errorHighlighter.clear(view);
-  resetInterpreter();
   const code = view.state.doc.toString();
+
+  // After a full run this button turns into "reset": clear the
+  // registers/memory state the run left behind, back to what a fresh
+  // load of this code looks like, instead of running again straight away.
+  if (hasRunFully) {
+    hasRunFully = false;
+    setRunBtnLabel('run');
+    interpreter = new Interpreter(code);
+    try {
+      interpreter.preprocess();
+    } catch {
+      // Same as the initial-load case: invalid code just leaves the
+      // panel empty rather than erroring on a reset click.
+    }
+    displayState();
+    return;
+  }
+
+  resetInterpreter();
   interpreter = new Interpreter(code);
   try {
     interpreter.interpret();
-
+    hasRunFully = true;
+    setRunBtnLabel('reset');
     displayState();
   } catch (error) {
     if (error instanceof RuntimeError || error instanceof PreprocessingError) {
