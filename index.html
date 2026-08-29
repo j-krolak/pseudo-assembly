@@ -40,12 +40,32 @@
       ></div>
 
       <div id="app" class="relative z-10 flex xl:flex-row flex-col gap-4">
-        <div class="panel flex-1 px-4 pb-4 flex flex-col">
+        <div
+          id="panel-sidebar"
+          class="flex xl:flex-col flex-row flex-wrap gap-2 sticky top-4 self-start"
+        >
+          <button id="show-registers-btn" class="hidden panel-sidebar-btn">
+            registers
+          </button>
+          <button id="show-code-btn" class="hidden panel-sidebar-btn">
+            code
+          </button>
+          <button id="show-memory-btn" class="hidden panel-sidebar-btn">
+            memory
+          </button>
+        </div>
+        <div id="registers-panel" class="panel flex-1 px-4 pb-4 flex flex-col">
           <div
             class="flex justify-between items-center mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
           >
-            <label>registers</label>
             <div id="registers-format" class="dropdown"></div>
+            <button
+              id="registers-collapse-btn"
+              title="hide panel"
+              class="panel-collapse-btn"
+            >
+              x
+            </button>
           </div>
           <div class="flex-1 flex justify-center items-center">
             <div id="registers"></div>
@@ -58,6 +78,10 @@
               class="flex items-center justify-between gap-2 mb-1 sticky top-0 bg-black z-10 pt-4 pb-1"
             >
               <div class="flex items-center gap-4">
+                <div class="flex items-center gap-2">
+                  <label> files</label>
+                  <div id="examples-select" class="dropdown"></div>
+                </div>
                 <label class="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -83,10 +107,13 @@
                   align
                 </label>
               </div>
-              <div class="flex items-center gap-2">
-                <label> files</label>
-                <div id="examples-select" class="dropdown"></div>
-              </div>
+              <button
+                id="code-collapse-btn"
+                title="hide panel"
+                class="panel-collapse-btn"
+              >
+                x
+              </button>
             </div>
             <div id="code"></div>
           </div>
@@ -131,15 +158,21 @@
             </div>
           </div>
         </div>
-        <div class="panel flex-1 pb-4 px-4 flex flex-col">
+        <div id="memory-panel" class="panel flex-1 pb-4 px-4 flex flex-col">
           <div
             class="flex justify-between items-center mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
           >
-            <label>memory</label>
             <div class="flex items-center gap-2">
               <div id="memory-view" class="dropdown"></div>
               <div id="memory-format" class="dropdown"></div>
             </div>
+            <button
+              id="memory-collapse-btn"
+              title="hide panel"
+              class="panel-collapse-btn"
+            >
+              x
+            </button>
           </div>
           <div class="flex-1 flex justify-center items-center">
             <div id="memory"></div>

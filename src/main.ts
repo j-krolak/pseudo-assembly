@@ -365,6 +365,35 @@ wireToggle(
   labelAlignExtensions,
 );
 
+// Lets the registers/code/memory panels be hidden entirely (display:
+// none, via the "hidden" class). A sidebar (#panel-sidebar) holds one
+// button per panel, shown only while that panel is hidden, to bring it
+// back.
+const PANEL_COLLAPSED_LS_KEY_PREFIX = 'panelCollapsed:';
+
+const wirePanelHide = (panelId: string, hideButtonId: string, showButtonId: string) => {
+  const panel = document.getElementById(panelId);
+  const hideButton = document.getElementById(hideButtonId);
+  const showButton = document.getElementById(showButtonId);
+  if (!panel || !hideButton || !showButton) return;
+
+  const lsKey = PANEL_COLLAPSED_LS_KEY_PREFIX + panelId;
+  const setHidden = (isHidden: boolean) => {
+    panel.classList.toggle('hidden', isHidden);
+    showButton.classList.toggle('hidden', !isHidden);
+    localStorage.setItem(lsKey, String(isHidden));
+  };
+
+  setHidden(localStorage.getItem(lsKey) === 'true');
+
+  hideButton.addEventListener('click', () => setHidden(true));
+  showButton.addEventListener('click', () => setHidden(false));
+};
+
+wirePanelHide('registers-panel', 'registers-collapse-btn', 'show-registers-btn');
+wirePanelHide('code-editor', 'code-collapse-btn', 'show-code-btn');
+wirePanelHide('memory-panel', 'memory-collapse-btn', 'show-memory-btn');
+
 let interpreter = new Interpreter(view.state.doc.toString());
 try {
   // Preprocess whatever code loaded initially (an example, a saved file)
