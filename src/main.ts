@@ -27,6 +27,7 @@ const LABEL_ALIGN_LS_KEY = 'labelAlign';
 const CUSTOM_FILES_LS_KEY = 'customFiles';
 const CURRENT_FILE_LS_KEY = 'currentFile';
 const MEMORY_VIEW_LS_KEY = 'memoryView';
+const STRICT_MODE_LS_KEY = 'strictMode';
 
 // HTML elements
 const runBtn = document.getElementById('run-btn');
@@ -50,6 +51,9 @@ const syntaxHighlightToggle = document.getElementById(
 const labelAlignToggle = document.getElementById(
   'label-align-toggle',
 ) as HTMLInputElement;
+const strictModeToggle = document.getElementById(
+  'strict-mode-toggle',
+) as HTMLInputElement | null;
 
 type DisplayNumberFormat = 'bin' | 'hex';
 let registersFormat: DisplayNumberFormat = 'bin';
@@ -87,6 +91,22 @@ const syntaxExtensions = [pasmLanguage, pasmSyntaxHighlighting];
 const labelAlignCompartment = new Compartment();
 const labelAlignEnabled = localStorage.getItem(LABEL_ALIGN_LS_KEY) !== 'false';
 const labelAlignExtensions = [pasmLabelAlign];
+
+// Not a CodeMirror extension like the toggles above - just a plain flag
+// read by every `new Interpreter(...)` call site below.
+let strictModeEnabled = localStorage.getItem(STRICT_MODE_LS_KEY) !== 'false';
+if (strictModeToggle) {
+  strictModeToggle.checked = strictModeEnabled;
+  strictModeToggle.addEventListener('change', () => {
+    strictModeEnabled = strictModeToggle.checked;
+    localStorage.setItem(STRICT_MODE_LS_KEY, String(strictModeEnabled));
+    if (!strictModeEnabled) {
+      alert(
+        'Non-strict mode is for advanced users - just for fun, to explore more complex/unsafe memory tricks. It does not hold on exams.',
+      );
+    }
+  });
+}
 
 // Files shown in the "files" dropdown: the built-in examples (immutable),
 // plus any user-added files, saved to and loaded from local storage.
@@ -164,7 +184,7 @@ const syncMemoryWithEditor = EditorView.updateListener.of((update) => {
 
   if (update.docChanged && !executingLineByLine) {
     try {
-      const fresh = new Interpreter(update.state.doc.toString());
+      const fresh = new Interpreter(update.state.doc.toString(), strictModeEnabled);
       fresh.preprocess();
       interpreter = fresh;
     } catch {
@@ -404,7 +424,7 @@ wirePanelHide('registers-panel', 'registers-collapse-btn', 'show-registers-btn')
 wirePanelHide('code-editor', 'code-collapse-btn', 'show-code-btn');
 wirePanelHide('memory-panel', 'memory-collapse-btn', 'show-memory-btn');
 
-let interpreter = new Interpreter(view.state.doc.toString());
+let interpreter = new Interpreter(view.state.doc.toString(), strictModeEnabled);
 try {
   // Preprocess whatever code loaded initially (an example, a saved file)
   // so the memory panel already reflects it, matching what typing does.
@@ -487,7 +507,7 @@ nextBtn?.addEventListener('click', () => {
   if (!executingLineByLine) {
     try {
       const code = view.state.doc.toString();
-      interpreter = new Interpreter(code);
+      interpreter = new Interpreter(code, strictModeEnabled);
       interpreter.preprocess();
       executionHighlighter.highlight(view, interpreter.currentLine + 1);
       executingLineByLine = true;
@@ -554,7 +574,7 @@ runBtn?.addEventListener('click', async () => {
   if (hasRunFully) {
     hasRunFully = false;
     setRunBtnLabel('run');
-    interpreter = new Interpreter(code);
+    interpreter = new Interpreter(code, strictModeEnabled);
     try {
       interpreter.preprocess();
     } catch {
@@ -566,7 +586,7 @@ runBtn?.addEventListener('click', async () => {
   }
 
   resetInterpreter();
-  interpreter = new Interpreter(code);
+  interpreter = new Interpreter(code, strictModeEnabled);
   try {
     interpreter.interpret();
     hasRunFully = true;
@@ -911,6 +931,11 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
         case 'DATA_HIDDEN':
           classNames.push('byte-data-hidden');
           byteHTML.innerHTML = '~'.repeat(width);
+          break;
+
+        case 'UNKNOWN':
+          classNames.push('byte-unknown');
+          byteHTML.innerHTML = 'x'.repeat(width);
       }
 
       byteHTML.className = classNames.join(' ');

@@ -40,12 +40,25 @@ export const opcodes: Record<string, number> = Object.fromEntries(
     .map((keyword, i) => [keyword, i + 1]),
 );
 
+// Reverse of `opcodes` - used to decode a byte back into a mnemonic when
+// executing self-modified .text (see Interpreter.executeFromBytes). Real
+// (unmodified) code never goes through this table; it's only consulted
+// when a write has overwritten an instruction's opcode byte.
+const opcodeToInstruction: Record<number, string> = Object.fromEntries(
+  Object.entries(opcodes).map(([keyword, code]) => [code, keyword]),
+);
+
 type byteType =
   | 'INSTRUCTION_OPCODE'
   | 'INSTRUCTION_OPERAND'
   | 'INSTRUCTION_UNUSED'
   | 'DATA'
-  | 'DATA_HIDDEN';
+  | 'DATA_HIDDEN'
+  // Memory outside the program's originally allocated size, exposed by a
+  // register/address computation gone wrong (e.g. a garbage address from
+  // bad pointer arithmetic). Only ever created in non-strict mode - see
+  // Interpreter.ensureAddressMapped.
+  | 'UNKNOWN';
 
 export type byte = {
   val: number;
@@ -106,7 +119,14 @@ class Interpreter {
   // register) shouldn't treat it as a real value until execution itself
   // has begun.
   hasStarted: boolean;
-  constructor(code: string) {
+  // Strict mode enforces memory protection: reads/writes outside the
+  // program's declared memory throw a segmentation fault, and .text
+  // (instruction bytes) can't be written to. Non-strict mode has neither
+  // restriction - out-of-bounds access silently grows memory (shown as
+  // 'UNKNOWN'/xxxx in the memory panel until something writes real data
+  // there), and .text can be overwritten like any other memory.
+  strict: boolean;
+  constructor(code: string, strict: boolean = true) {
     this.registers = new Int32Array(16);
     this.statements = [...code.split('\n')].map((val) => ({
       val: val,
@@ -120,6 +140,7 @@ class Interpreter {
     this.bytes = [];
     this.isRegisterInitialized = new Array(16).fill(false);
     this.hasStarted = false;
+    this.strict = strict;
   }
 
   isAtEnd() {
@@ -477,7 +498,7 @@ class Interpreter {
       return Number(param);
     }
     if (/^0\(\d+\)$/.test(param)) {
-      return this.registers[Number(param.slice(2, -1))];
+      return this.registers[this.parseRegister(param.slice(2, -1))];
     }
 
     const label = this.labels.find((label) => label.label === param);
@@ -487,6 +508,56 @@ class Interpreter {
     }
 
     return label.address;
+  }
+
+  // A register operand must be a plain integer 0-15 - "TEST_VAL" or a
+  // stray "16" would otherwise silently become NaN/undefined and the
+  // instruction would do nothing rather than error.
+  parseRegister(token: string): number {
+    const reg = Number(token);
+    if (!Number.isInteger(reg) || reg < 0 || reg > 15) {
+      throw this.runtimeError(`Expected a register number (0-15), got "${token}".`);
+    }
+    return reg;
+  }
+
+  isInstructionByteType(type: byteType): boolean {
+    return (
+      type === 'INSTRUCTION_OPCODE' ||
+      type === 'INSTRUCTION_OPERAND' ||
+      type === 'INSTRUCTION_UNUSED'
+    );
+  }
+
+  // Bounds-checks a memory access before it happens. In strict mode,
+  // anything outside the program's declared memory is a segmentation
+  // fault. In non-strict mode, memory grows on demand instead - newly
+  // exposed bytes are 'UNKNOWN' (rendered as xxxx) until something
+  // actually writes real data there.
+  ensureAddressMapped(addr: number, size: number) {
+    if (addr < 0) {
+      throw this.runtimeError(`Invalid memory address ${addr}.`);
+    }
+    const end = addr + size;
+    if (end <= this.bytes.length) return;
+
+    if (this.strict) {
+      throw this.runtimeError(
+        `Segmentation fault: address 0x${addr
+          .toString(16)
+          .padStart(4, '0')} is outside the program's declared memory (0x0000-0x${(this.bytes.length - 1).toString(16).padStart(4, '0')}).`,
+      );
+    }
+
+    // Every other part of the interpreter (the memory panel's 4-byte rows,
+    // numberToBytes/bytesToNumber, word-sized reads/writes) assumes
+    // bytes.length is always a multiple of 4 - round growth up to the next
+    // word boundary so that stays true even when `end` itself isn't
+    // 4-aligned (e.g. a garbage address from bad pointer arithmetic).
+    const alignedEnd = Math.ceil(end / 4) * 4;
+    while (this.bytes.length < alignedEnd) {
+      this.bytes.push({ val: 0, type: 'UNKNOWN' });
+    }
   }
 
   // Check if instruction is register-regitser
@@ -505,6 +576,7 @@ class Interpreter {
   }
 
   getNumberFromMemory(addr: number): number {
+    this.ensureAddressMapped(addr, 4);
     return this.bytesToNumber([
       this.bytes[addr],
       this.bytes[addr + 1],
@@ -513,6 +585,21 @@ class Interpreter {
     ]);
   }
   setNumberInMemory(addr: number, num: number) {
+    this.ensureAddressMapped(addr, 4);
+
+    if (this.strict) {
+      const overlapsInstruction = [0, 1, 2, 3].some((i) =>
+        this.isInstructionByteType(this.bytes[addr + i].type),
+      );
+      if (overlapsInstruction) {
+        throw this.runtimeError(
+          `Segmentation fault: cannot write to instruction memory (.text) at address 0x${addr
+            .toString(16)
+            .padStart(4, '0')}.`,
+        );
+      }
+    }
+
     const data = this.numberToBytes(num);
     data.map((val, i) => {
       this.bytes[addr + i] = val;
@@ -529,6 +616,10 @@ class Interpreter {
       }
 
       if (addr < stmtAddr) {
+        // In non-strict mode a jump to a nonsensical address just ends the
+        // program instead of throwing - there's no real instruction there
+        // to continue from.
+        if (!this.strict) return this.statements.length;
         throw this.runtimeError(
           `InvalidJumpTarget - attempted to jump to address 0x${addr
             .toString(16)
@@ -538,6 +629,7 @@ class Interpreter {
 
       stmtAddr += this.statements[i].byteSize;
     }
+    if (!this.strict) return this.statements.length;
     throw this.runtimeError(
       `InvalidJumpTarget - attempted to jump to address 0x${addr
         .toString(16)
@@ -596,9 +688,194 @@ class Interpreter {
 
       if (instruction !== 'DC' && instruction !== 'DS') return;
 
+      // A DS buffer that's been written to (e.g. a copy-and-modify
+      // self-modifying trick that jumps into it) is no longer just
+      // reserved-and-empty space - stop here instead of skipping past it,
+      // so interpretNextLine() gets a chance to execute it from bytes.
+      // DC data has no such "untouched" signal (it's always real data
+      // from the moment it's declared), so it's always skipped as before.
+      if (instruction === 'DS' && this.bytes[this.currentMemoryAddress]?.type !== 'DATA_HIDDEN') {
+        return;
+      }
+
       this.currentMemoryAddress += this.statements[this.currentLine].byteSize;
       this.currentLine += 1;
     }
+  }
+
+  // Shared by both execution paths (parsed source text and decoded self-
+  // modified bytes) so the actual register-register semantics exist in
+  // exactly one place.
+  executeRR(instruction: string, r1: number, r2: number) {
+    this.isRegisterInitialized[r1] = true;
+    switch (instruction) {
+      case 'AR':
+        this.registers[r1] += this.registers[r2];
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'SR':
+        this.registers[r1] -= this.registers[r2];
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'MR':
+        this.registers[r1] *= this.registers[r2];
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'DR':
+        this.registers[r1] = Math.floor(this.registers[r1] / this.registers[r2]);
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'CR':
+        this.updateEflags(this.registers[r1] - this.registers[r2]);
+        break;
+      case 'LR':
+        this.registers[r1] = this.registers[r2];
+        this.updateEflags(this.registers[r1]);
+        break;
+    }
+  }
+
+  // Shared by both execution paths - see executeRR. `addr` is already the
+  // final resolved memory address (indirect "0(<reg>)" addressing has
+  // already been dereferenced by the caller).
+  executeRM(instruction: string, r1: number, addr: number) {
+    this.isRegisterInitialized[r1] = true;
+    switch (instruction) {
+      case 'A':
+        this.registers[r1] += this.getNumberFromMemory(addr);
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'S':
+        this.registers[r1] -= this.getNumberFromMemory(addr);
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'M':
+        this.registers[r1] *= this.getNumberFromMemory(addr);
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'D':
+        this.registers[r1] = Math.floor(
+          this.registers[r1] / this.getNumberFromMemory(addr),
+        );
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'C':
+        this.updateEflags(this.registers[r1] - this.getNumberFromMemory(addr));
+        break;
+      case 'L':
+        this.registers[r1] = this.getNumberFromMemory(addr);
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'ST':
+        this.setNumberInMemory(addr, this.registers[r1]);
+        this.updateEflags(this.registers[r1]);
+        break;
+      case 'LA':
+        this.registers[r1] = addr;
+        this.updateEflags(this.registers[r1]);
+        break;
+    }
+  }
+
+  // Shared by both execution paths - see executeRR. Returns the resolved
+  // jump target if the condition is met, or null to fall through to the
+  // next instruction as normal.
+  executeJump(
+    instruction: string,
+    addr: number,
+  ): { line: number; addr: number } | null {
+    const takeJump =
+      instruction === 'J' ||
+      (instruction === 'JP' &&
+        !(this.eflags & (1 << FLAGS.SF) || this.eflags & (1 << FLAGS.ZF))) ||
+      (instruction === 'JN' && !!(this.eflags & (1 << FLAGS.SF))) ||
+      (instruction === 'JZ' && !!(this.eflags & (1 << FLAGS.ZF)));
+
+    if (!takeJump) return null;
+    return { line: this.getStatmentLine(addr), addr };
+  }
+
+  // Finds which statement's byte range currently contains `addr` - a
+  // looser version of getStatmentLine (no exact-start requirement, never
+  // throws) used only to keep `currentLine` pointing somewhere sane for
+  // UI highlighting after executing self-modified bytes. Self-modified
+  // code can change an instruction's size, drifting subsequent addresses
+  // away from any original statement boundary - when that happens this
+  // just reports "end of program" rather than guessing.
+  findLineContainingAddress(addr: number): number {
+    let stmtAddr = 0;
+    for (let i = 0; i < this.statements.length; i++) {
+      const size = this.statements[i].byteSize;
+      if (size > 0 && addr >= stmtAddr && addr < stmtAddr + size) return i;
+      stmtAddr += size;
+    }
+    return this.statements.length;
+  }
+
+  // Executes the instruction encoded at `this.currentMemoryAddress` in
+  // `this.bytes` directly, instead of parsing the original source line -
+  // the path taken once a write has overwritten an instruction's opcode
+  // byte (self-modifying code, non-strict mode only). Every real
+  // (unmodified) instruction's bytes were themselves derived from its
+  // source line during preprocess(), so decoding them here reproduces the
+  // exact same execution as the text-parsing path - this only ever
+  // diverges from the source for bytes a running program has rewritten.
+  executeFromBytes() {
+    const addr = this.currentMemoryAddress;
+    this.ensureAddressMapped(addr, 1);
+    const opcodeByte = this.bytes[addr].val;
+    const instruction = opcodeToInstruction[opcodeByte];
+    if (instruction === undefined) {
+      throw this.runtimeError(
+        `Illegal instruction: opcode 0x${opcodeByte
+          .toString(16)
+          .padStart(2, '0')} at address 0x${addr
+          .toString(16)
+          .padStart(4, '0')} is not a recognized instruction.`,
+      );
+    }
+
+    let size: number;
+    if (this.isInstructionRR(instruction)) {
+      size = 2;
+      this.ensureAddressMapped(addr, size);
+      const packed = this.bytes[addr + 1].val;
+      this.executeRR(instruction, (packed >> 4) & 0xf, packed & 0xf);
+    } else if (this.isInstructionRM(instruction)) {
+      size = 7;
+      this.ensureAddressMapped(addr, size);
+      const r1 = this.bytes[addr + 1].val;
+      const mode = this.bytes[addr + 2].val;
+      const rawAddr = this.bytesToNumber([
+        this.bytes[addr + 3],
+        this.bytes[addr + 4],
+        this.bytes[addr + 5],
+        this.bytes[addr + 6],
+      ]);
+      const resolvedAddr = mode === 1 ? this.registers[rawAddr] : rawAddr;
+      this.executeRM(instruction, r1, resolvedAddr);
+    } else {
+      size = 6;
+      this.ensureAddressMapped(addr, size);
+      const mode = this.bytes[addr + 1].val;
+      const rawAddr = this.bytesToNumber([
+        this.bytes[addr + 2],
+        this.bytes[addr + 3],
+        this.bytes[addr + 4],
+        this.bytes[addr + 5],
+      ]);
+      const resolvedAddr = mode === 1 ? this.registers[rawAddr] : rawAddr;
+      const jumped = this.executeJump(instruction, resolvedAddr);
+      if (jumped) {
+        this.currentLine = jumped.line;
+        this.currentMemoryAddress = jumped.addr;
+        return;
+      }
+    }
+
+    this.currentMemoryAddress = addr + size;
+    this.currentLine = this.findLineContainingAddress(this.currentMemoryAddress);
+    this.skipNonExecutableLines();
   }
 
   interpretNextLine() {
@@ -606,6 +883,15 @@ class Interpreter {
     this.executedLines += 1;
     this.skipNonExecutableLines();
     if (this.isAtEnd()) return;
+
+    // Self-modified code (a write overwrote this instruction's opcode
+    // byte) is executed straight from `this.bytes` instead of the
+    // original source text - see executeFromBytes.
+    const pcByte = this.bytes[this.currentMemoryAddress];
+    if (pcByte && pcByte.type !== 'INSTRUCTION_OPCODE') {
+      this.executeFromBytes();
+      return;
+    }
 
     const tokens = this.splitStatment(
       this.removeComments(this.statements[this.currentLine].val),
@@ -629,7 +915,7 @@ class Interpreter {
             `To many argument for instruction "${instruction}" .`,
           );
         }
-        const r1 = Number(tokens[currentIndex]);
+        const r1 = this.parseRegister(tokens[currentIndex]);
         currentIndex += 1;
         if (tokens[currentIndex] != ',') {
           throw this.runtimeError(
@@ -637,36 +923,8 @@ class Interpreter {
           );
         }
         currentIndex += 1;
-        const r2 = Number(tokens[currentIndex]);
-
-        this.isRegisterInitialized[r1] = true;
-        switch (instruction) {
-          case 'AR':
-            this.registers[r1] += this.registers[r2];
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'SR':
-            this.registers[r1] -= this.registers[r2];
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'MR':
-            this.registers[r1] *= this.registers[r2];
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'DR':
-            this.registers[r1] = Math.floor(
-              this.registers[r1] / this.registers[r2],
-            );
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'CR':
-            this.updateEflags(this.registers[r1] - this.registers[r2]);
-            break;
-          case 'LR':
-            this.registers[r1] = this.registers[r2];
-            this.updateEflags(this.registers[r1]);
-            break;
-        }
+        const r2 = this.parseRegister(tokens[currentIndex]);
+        this.executeRR(instruction, r1, r2);
       }
 
       // Register-memory instructions
@@ -676,7 +934,7 @@ class Interpreter {
             `To many argument for instruction "${instruction}" .`,
           );
         }
-        const r1 = Number(tokens[currentIndex]);
+        const r1 = this.parseRegister(tokens[currentIndex]);
         currentIndex += 1;
         if (tokens[currentIndex] != ',') {
           throw this.runtimeError(
@@ -685,48 +943,7 @@ class Interpreter {
         }
         currentIndex += 1;
         const addr = this.getMemoryAddr(tokens[currentIndex]);
-        this.isRegisterInitialized[r1] = true;
-        switch (instruction) {
-          case 'A':
-            this.registers[r1] += this.getNumberFromMemory(addr);
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'S':
-            this.registers[r1] -= this.getNumberFromMemory(addr);
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'M':
-            this.registers[r1] *= this.getNumberFromMemory(addr);
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'D':
-            this.registers[r1] = Math.floor(
-              this.registers[r1] / this.getNumberFromMemory(addr),
-            );
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'C':
-            this.updateEflags(
-              this.registers[r1] - this.getNumberFromMemory(addr),
-            );
-            // this.eflags ^= (1 << FLAGS.ZF) | (1 << FLAGS.SF);
-            // this.eflags |= this.registers[r1] === 0 ? 1 << FLAGS.ZF : 0;
-            // this.eflags |= this.registers[r1] < 0 ? 1 << FLAGS.SF : 0;
-
-            break;
-          case 'L':
-            this.registers[r1] = this.getNumberFromMemory(addr);
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'ST':
-            this.setNumberInMemory(addr, this.registers[r1]);
-            this.updateEflags(this.registers[r1]);
-            break;
-          case 'LA':
-            this.registers[r1] = addr;
-            this.updateEflags(this.registers[r1]);
-            break;
-        }
+        this.executeRM(instruction, r1, addr);
       }
 
       if (this.isInstructionJump(instruction)) {
@@ -736,35 +953,11 @@ class Interpreter {
           );
         }
         const addr = this.getMemoryAddr(tokens[currentIndex]);
-        const statmentLine = this.getStatmentLine(addr);
-        switch (instruction) {
-          case 'J':
-            this.currentLine = statmentLine;
-            this.currentMemoryAddress = addr;
-            return;
-          case 'JP':
-            if (
-              !(this.eflags & (1 << FLAGS.SF) || this.eflags & (1 << FLAGS.ZF))
-            ) {
-              this.currentLine = statmentLine;
-              this.currentMemoryAddress = addr;
-              return;
-            }
-            break;
-          case 'JN':
-            if (this.eflags & (1 << FLAGS.SF)) {
-              this.currentLine = statmentLine;
-              this.currentMemoryAddress = addr;
-              return;
-            }
-            break;
-          case 'JZ':
-            if (this.eflags & (1 << FLAGS.ZF)) {
-              this.currentLine = statmentLine;
-              this.currentMemoryAddress = addr;
-              return;
-            }
-            break;
+        const jumped = this.executeJump(instruction, addr);
+        if (jumped) {
+          this.currentLine = jumped.line;
+          this.currentMemoryAddress = jumped.addr;
+          return;
         }
       }
     } else {
