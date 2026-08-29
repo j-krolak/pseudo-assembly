@@ -395,4 +395,51 @@ J ROW
 END SR 0, 0
 `,
   },
+  {
+    name: 'copy-and-modify self-mod (non-strict-safe)',
+    code: `# copy ORIGA/ORIGB's bytes, patch the copy
+# (AR -> SR), run it. Originals stay untouched
+ONE DC INTEGER(1)
+FIVE DC INTEGER(5)
+PATCH DC INTEGER(33554432)
+BASELINE DS INTEGER
+MODIFIED DS INTEGER
+COPY DS INTEGER
+
+# re-entry: r9=0 first time, r9=1 after copy
+START SR 8, 8
+CR 9, 8
+JZ FIRSTTIME
+J FINALIZE
+
+FIRSTTIME L 1, FIVE
+L 2, ONE
+J ORIGA
+
+# save baseline, then build the patched COPY
+BACK1 LR 6, 1
+LA 3, ORIGA
+L 4, 0(3)
+ST 4, COPY
+L 5, COPY
+A 5, PATCH
+ST 5, COPY
+
+L 1, FIVE
+LR 9, 2
+J COPY
+
+# copy ran - report both results
+FINALIZE LR 7, 1
+ST 6, BASELINE
+ST 7, MODIFIED
+J DONE
+
+ORIGA AR 1, 2
+ORIGB SR 1, 2
+J BACK1
+
+DONE SR 0, 0
+`,
+  },
 ];
