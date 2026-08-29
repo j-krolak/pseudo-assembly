@@ -6,9 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>pseudo assembly</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script type="module" crossorigin src="/pseudo-assembly/assets/main-DcFXJefR.js"></script>
-    <link rel="modulepreload" crossorigin href="/pseudo-assembly/assets/index-B7dxPleB.js">
-    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-YBJDTVHf.css">
+    <script type="module" crossorigin src="/pseudo-assembly/assets/main-D-tQD4bN.js"></script>
+    <link rel="modulepreload" crossorigin href="/pseudo-assembly/assets/index-H4dfowVK.js">
+    <link rel="stylesheet" crossorigin href="/pseudo-assembly/assets/style-B2p8DRwC.css">
   </head>
   <body class="font-mono">
     <nav
@@ -56,7 +56,7 @@
             memory
           </button>
         </div>
-        <div id="registers-panel" class="panel flex-1 px-4 pb-4 flex flex-col">
+        <div id="registers-panel" class="panel flex-1 min-w-0 px-4 pb-4 flex flex-col">
           <div
             class="flex justify-between items-center mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
           >
@@ -69,21 +69,30 @@
               x
             </button>
           </div>
-          <div class="flex-1 flex justify-center items-center">
+          <div class="flex-1 min-w-0 flex justify-center items-center">
             <div id="registers"></div>
           </div>
         </div>
-        <div id="code-editor" class="panel flex-1 px-4">
+        <div id="code-editor" class="panel flex-1 min-w-0 px-4">
           <div>
             <div
               id="editor-toolbar"
-              class="flex items-center justify-between gap-2 mb-1 sticky top-0 bg-black z-10 pt-4 pb-1"
+              class="flex flex-col gap-2 mb-1 sticky top-0 bg-black z-10 pt-4 pb-1"
             >
-              <div class="flex items-center gap-4">
+              <div class="flex items-center justify-between gap-2">
                 <div class="flex items-center gap-2">
                   <label> files</label>
                   <div id="examples-select" class="dropdown"></div>
                 </div>
+                <button
+                  id="code-collapse-btn"
+                  title="hide panel"
+                  class="panel-collapse-btn"
+                >
+                  x
+                </button>
+              </div>
+              <div class="flex items-center gap-4 flex-wrap">
                 <label class="flex items-center gap-2">
                   <input
                     type="checkbox"
@@ -108,14 +117,18 @@
                   />
                   align
                 </label>
+                <label
+                  class="flex items-center gap-2"
+                  title="memory protection: out-of-bounds access and writes to .text throw a segmentation fault. Turn off to allow anything."
+                >
+                  <input
+                    type="checkbox"
+                    id="strict-mode-toggle"
+                    class="toggle-checkbox"
+                  />
+                  strict
+                </label>
               </div>
-              <button
-                id="code-collapse-btn"
-                title="hide panel"
-                class="panel-collapse-btn"
-              >
-                x
-              </button>
             </div>
             <div id="code"></div>
           </div>
@@ -160,7 +173,7 @@
             </div>
           </div>
         </div>
-        <div id="memory-panel" class="panel flex-1 pb-4 px-4 flex flex-col">
+        <div id="memory-panel" class="panel flex-1 min-w-0 pb-4 px-4 flex flex-col">
           <div
             class="flex justify-between items-center mb-2 sticky top-0 bg-black z-10 pb-2 pt-4"
           >
@@ -176,7 +189,7 @@
               x
             </button>
           </div>
-          <div class="flex-1 flex justify-center items-center">
+          <div class="flex-1 min-w-0 flex justify-center items-start">
             <div id="memory"></div>
           </div>
         </div>
