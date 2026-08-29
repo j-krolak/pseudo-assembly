@@ -248,10 +248,10 @@
 }
 
 .memory-section-label {
-  grid-column: 1 / -1;
   padding: 0.25rem 0;
   font-size: 0.75rem;
   letter-spacing: 0.05em;
+  white-space: nowrap;
 }
 
 .memory-header-cell {

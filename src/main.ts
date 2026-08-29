@@ -738,11 +738,32 @@ const addMemorySectionLabel = (
   memoryNodes: Node[],
   text: string,
   className: string,
+  showLabels: boolean,
 ) => {
+  // A full grid row with the same cell count as every other row (label?,
+  // address, 4 byte cells, value), same as headerRow below - only the
+  // address cell has text, the rest are empty. Just spanning the address
+  // cell alone (without filling out the rest of the row) would leave the
+  // grid's auto-placement to spill the next row's cells into the leftover
+  // slots of this one, shifting everything after it out of alignment.
+  const record = document.createElement('div');
+  record.className = 'byte-record';
+
+  if (showLabels) {
+    record.appendChild(document.createElement('div'));
+  }
+
   const label = document.createElement('div');
   label.className = `memory-section-label ${className}`;
   label.textContent = text;
-  memoryNodes.push(label);
+  record.appendChild(label);
+
+  for (let k = 0; k < 4; k += 1) {
+    record.appendChild(document.createElement('div'));
+  }
+  record.appendChild(document.createElement('div'));
+
+  memoryNodes.push(record);
 };
 
 const createMemoryDiv = (bytes: byte[]): Node[] => {
@@ -799,7 +820,7 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
   }
 
   if (hasData) {
-    addMemorySectionLabel(memoryNodes, '.data', 'section-data');
+    addMemorySectionLabel(memoryNodes, '.data', 'section-data', showLabels);
   }
 
   const labelForRow = (rowStart: number): string =>
@@ -809,7 +830,7 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
 
   for (let i = 0; i < bytes.length; i += 4) {
     if (hasCode && i === codeStart) {
-      addMemorySectionLabel(memoryNodes, '.text', 'section-text');
+      addMemorySectionLabel(memoryNodes, '.text', 'section-text', showLabels);
     }
 
     const record = document.createElement('div');
