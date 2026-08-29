@@ -39,8 +39,8 @@
 
 #memory {
   font-family: 'Courier New', Courier, monospace;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  column-gap: 0.75rem;
 }
 
 .dropdown {
@@ -139,16 +139,16 @@
   color: #fff;
 }
 
+/* The row wrapper itself renders no box - its cells become direct grid
+   items of #memory, so every row snaps to the exact same column tracks
+   instead of each row sizing its own cells independently (which is what
+   kept causing the header to drift out of alignment with the data rows). */
 .byte-record {
-  display: flex;
-}
-
-.byte-record > div {
-  padding: 0 0.5rem;
+  display: contents;
 }
 
 .rep-data {
-  color: #44aa00ff;
+  color: #e62286;
 }
 
 .register-name {
@@ -157,6 +157,69 @@
 
 .current-memory {
   background-color: rgba(37, 99, 235, 0.35);
+}
+
+.selected-memory {
+  background-color: rgba(230, 34, 134, 0.25);
+}
+
+.byte-data {
+  color: #00d8ff;
+}
+
+.byte-data-hidden {
+  color: #555;
+}
+
+.byte-instruction-opcode {
+  color: #44aa00ff;
+}
+
+.byte-instruction-operand {
+  color: #e8a33d;
+}
+
+.byte-instruction-unused {
+  color: #555;
+}
+
+.memory-label {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: #fff;
+  font-weight: 600;
+}
+
+.memory-section-label {
+  grid-column: 1 / -1;
+  padding: 0.25rem 0;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.memory-header-cell {
+  color: #666;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding-bottom: 0.25rem;
+}
+
+/* One continuous rule spanning every column, instead of each header cell
+   drawing its own border-bottom - those broke into dashes at the gaps
+   between columns. */
+.memory-header-rule {
+  grid-column: 1 / -1;
+  border-bottom: 1px solid #2e2e2e;
+  margin-bottom: 0.25rem;
+}
+
+.memory-section-label.section-data {
+  color: #00d8ff;
+}
+
+.memory-section-label.section-text {
+  color: #44aa00ff;
 }
 
 #code {

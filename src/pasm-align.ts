@@ -21,30 +21,16 @@ class LabelGapWidget extends WidgetType {
     return other.width === this.width;
   }
 
-  toDOM(view: EditorView) {
+  toDOM() {
     const span = document.createElement('span');
     span.style.display = 'inline-block';
     span.style.width = `${this.width}ch`;
     span.style.borderRight = '1px solid #2E2E2E';
-    // Clicking anywhere in this gap should land the cursor at the start of
-    // the label column, not wherever the browser's default hit-testing
-    // happens to snap to (which tends to be the far edge, right up against
-    // the instruction that follows).
-    span.addEventListener('mousedown', (event) => {
-      event.preventDefault();
-      const pos = view.posAtDOM(span);
-      view.dispatch({ selection: { anchor: pos } });
-      view.focus();
-    });
     return span;
   }
 
   get estimatedHeight() {
     return -1;
-  }
-
-  ignoreEvent() {
-    return true;
   }
 }
 

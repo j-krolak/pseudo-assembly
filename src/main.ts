@@ -26,6 +26,7 @@ const SYNTAX_HIGHLIGHT_LS_KEY = 'syntaxHighlight';
 const LABEL_ALIGN_LS_KEY = 'labelAlign';
 const CUSTOM_FILES_LS_KEY = 'customFiles';
 const CURRENT_FILE_LS_KEY = 'currentFile';
+const MEMORY_VIEW_LS_KEY = 'memoryView';
 
 // HTML elements
 const runBtn = document.getElementById('run-btn');
@@ -39,6 +40,7 @@ const errorsDiv = document.getElementById('errors') as HTMLDivElement;
 const examplesDropdown = document.getElementById('examples-select');
 const registersFormatDropdown = document.getElementById('registers-format');
 const memoryFormatDropdown = document.getElementById('memory-format');
+const memoryViewDropdown = document.getElementById('memory-view');
 const vimModeToggle = document.getElementById(
   'vim-mode-toggle',
 ) as HTMLInputElement;
@@ -52,6 +54,15 @@ const labelAlignToggle = document.getElementById(
 type DisplayNumberFormat = 'bin' | 'hex';
 let registersFormat: DisplayNumberFormat = 'bin';
 let memoryFormat: DisplayNumberFormat = 'bin';
+
+type MemoryView = 'raw' | 'sections' | 'sections-labels';
+const memoryViewOptions: MemoryView[] = ['raw', 'sections', 'sections-labels'];
+const storedMemoryView = localStorage.getItem(MEMORY_VIEW_LS_KEY);
+let memoryView: MemoryView = memoryViewOptions.includes(
+  storedMemoryView as MemoryView,
+)
+  ? (storedMemoryView as MemoryView)
+  : 'sections-labels';
 
 // CodeMirror
 let executingLineByLine = false;
@@ -134,6 +145,44 @@ const persistOnChange = EditorView.updateListener.of((update) => {
       saveCustomFiles(customFiles);
     }
   }
+});
+
+// The byte range (in interpreter.bytes) that the current text selection
+// compiles to, or null when nothing (or just a cursor) is selected.
+let selectedByteRange: { from: number; to: number } | null = null;
+
+// Keeps the memory panel in sync with the editor: re-preprocessing on
+// every edit (while not actively executing, since the editor is
+// non-editable then anyway) so memory reflects what's being typed, and
+// recomputing the selection's byte range so it can be highlighted.
+const syncMemoryWithEditor = EditorView.updateListener.of((update) => {
+  if (!update.docChanged && !update.selectionSet) return;
+
+  if (update.docChanged && !executingLineByLine) {
+    try {
+      const fresh = new Interpreter(update.state.doc.toString());
+      fresh.preprocess();
+      interpreter = fresh;
+    } catch {
+      // Mid-edit code is often invalid (e.g. an unfinished
+      // "INTEGER(..."), so keep showing the last valid state rather than
+      // clearing the panel on every keystroke.
+    }
+  }
+
+  const { from, to } = update.state.selection.main;
+  if (from === to) {
+    selectedByteRange = null;
+  } else {
+    const startLine = update.state.doc.lineAt(from).number - 1;
+    const endLine = update.state.doc.lineAt(to).number - 1;
+    selectedByteRange = {
+      from: interpreter.getLineAddress(startLine),
+      to: interpreter.getLineAddress(endLine + 1),
+    };
+  }
+
+  displayState();
 });
 
 // Shared machinery for "highlight one line a solid color" - used both for
@@ -272,6 +321,7 @@ let state = EditorState.create({
     errorHighlighter.field,
     blackBackground,
     persistOnChange,
+    syncMemoryWithEditor,
     editorToolbarScrollMargin,
   ],
 });
@@ -316,6 +366,14 @@ wireToggle(
 );
 
 let interpreter = new Interpreter(view.state.doc.toString());
+try {
+  // Preprocess whatever code loaded initially (an example, a saved file)
+  // so the memory panel already reflects it, matching what typing does.
+  interpreter.preprocess();
+} catch {
+  // Invalid starting code just leaves the panel empty, same as any other
+  // preprocessing failure.
+}
 
 // nextBtn's label switches between "run line by line" and "next line", but
 // its f10 shortcut hint span must survive that swap - plain innerHTML
@@ -378,8 +436,8 @@ nextBtn?.addEventListener('click', () => {
     try {
       const code = view.state.doc.toString();
       interpreter = new Interpreter(code);
-      executionHighlighter.highlight(view, interpreter.currentLine + 1);
       interpreter.preprocess();
+      executionHighlighter.highlight(view, interpreter.currentLine + 1);
       executingLineByLine = true;
       view.dispatch({
         effects: editableCompartment.reconfigure([
@@ -477,6 +535,10 @@ window.addEventListener('keydown', (event) => {
 
 const displayState = () => {
   registersDiv?.replaceChildren(
+    ...createProgramCounterNode(
+      interpreter.currentMemoryAddress,
+      interpreter.hasStarted,
+    ),
     ...createFlagNodes(interpreter.eflags),
     ...createRegistersNodes(interpreter.registers),
   );
@@ -513,6 +575,45 @@ if (memoryFormatDropdown) {
     },
   );
 }
+
+if (memoryViewDropdown) {
+  createDropdown(
+    memoryViewDropdown,
+    [
+      { value: 'raw', label: 'raw' },
+      { value: 'sections', label: 'sections' },
+      { value: 'sections-labels', label: 'sections + labels' },
+    ],
+    memoryView,
+    (value) => {
+      memoryView = value as MemoryView;
+      localStorage.setItem(MEMORY_VIEW_LS_KEY, memoryView);
+      displayState();
+    },
+  );
+}
+
+const createProgramCounterNode = (address: number, isSet: boolean): Node[] => {
+  const pcHTML = document.createElement('div');
+  pcHTML.className = 'register flex justify-between';
+
+  const label = document.createElement('div');
+  label.innerHTML = '<span class="register-name">PC</span>';
+
+  const width = registersFormat === 'hex' ? 8 : 32;
+  const formattedValue = isSet
+    ? (registersFormat === 'hex' ? '0x' : '0b') +
+      address
+        .toString(registersFormat === 'hex' ? 16 : 2)
+        .padStart(width, '0')
+    : (registersFormat === 'hex' ? '0x' : '0b') + '~'.repeat(width);
+
+  const values = document.createElement('div');
+  values.innerHTML = formattedValue;
+
+  pcHTML.append(label, values);
+  return [pcHTML];
+};
 
 const createFlagNodes = (eflags: number): Node[] => {
   const zf = (eflags >> FLAGS.ZF) & 1;
@@ -562,13 +663,99 @@ const createRegistersNodes = (registers: Int32Array): Node[] => {
   return registersHTML;
 };
 
+const addMemorySectionLabel = (
+  memoryNodes: Node[],
+  text: string,
+  className: string,
+) => {
+  const label = document.createElement('div');
+  label.className = `memory-section-label ${className}`;
+  label.textContent = text;
+  memoryNodes.push(label);
+};
+
 const createMemoryDiv = (bytes: byte[]): Node[] => {
   const memoryNodes: Node[] = [];
   const width = memoryFormat === 'hex' ? 2 : 8;
+  const showSections = memoryView !== 'raw';
+  const showLabels = memoryView === 'sections-labels';
+
+  // Every row (header, section dividers, data rows) is laid out as cells
+  // in this same grid, so they can never drift out of alignment with
+  // each other the way independently-sized flex rows did.
+  if (memoryDiv) {
+    memoryDiv.style.gridTemplateColumns =
+      (showLabels ? '12ch ' : '') + `7ch repeat(4, ${width}ch) auto`;
+  }
+
+  const codeStart = bytes.findIndex(
+    (byte) => byte.type !== 'DATA' && byte.type !== 'DATA_HIDDEN',
+  );
+  const hasData = showSections && bytes.length > 0 && codeStart !== 0;
+  const hasCode = showSections && codeStart !== -1;
+
+  if (bytes.length > 0) {
+    const headerRow = document.createElement('div');
+    headerRow.className = 'byte-record';
+
+    if (showLabels) {
+      const labelHeader = document.createElement('div');
+      labelHeader.className = 'memory-header-cell';
+      headerRow.appendChild(labelHeader);
+    }
+
+    const addressHeader = document.createElement('div');
+    addressHeader.className = 'memory-header-cell';
+    addressHeader.textContent = 'address';
+    headerRow.appendChild(addressHeader);
+
+    for (let k = 0; k < 4; k += 1) {
+      const spacer = document.createElement('div');
+      spacer.className = 'memory-header-cell';
+      headerRow.appendChild(spacer);
+    }
+
+    const valueHeader = document.createElement('div');
+    valueHeader.className = 'memory-header-cell';
+    valueHeader.textContent = 'value';
+    headerRow.appendChild(valueHeader);
+
+    memoryNodes.push(headerRow);
+
+    const headerRule = document.createElement('div');
+    headerRule.className = 'memory-header-rule';
+    memoryNodes.push(headerRule);
+  }
+
+  if (hasData) {
+    addMemorySectionLabel(memoryNodes, '.data', 'section-data');
+  }
+
+  const labelForRow = (rowStart: number): string =>
+    interpreter.labels.find(
+      (label) => label.address >= rowStart && label.address < rowStart + 4,
+    )?.label ?? '';
+
   for (let i = 0; i < bytes.length; i += 4) {
+    if (hasCode && i === codeStart) {
+      addMemorySectionLabel(memoryNodes, '.text', 'section-text');
+    }
+
     const record = document.createElement('div');
     record.className = 'byte-record';
-    record.innerHTML = `0x${i.toString(16).padStart(4, '0')}: `;
+
+    if (showLabels) {
+      const labelHTML = document.createElement('div');
+      labelHTML.className = 'memory-label';
+      labelHTML.textContent = labelForRow(i);
+      record.appendChild(labelHTML);
+    }
+
+    const addressHTML = document.createElement('div');
+    addressHTML.className = 'memory-address';
+    addressHTML.textContent = `0x${i.toString(16).padStart(4, '0')}:`;
+    record.appendChild(addressHTML);
+
     for (let j = i; j < i + 4; j += 1) {
       const byteHTML = document.createElement('div');
       if (j >= interpreter.bytes.length) {
@@ -577,6 +764,7 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
         continue;
       }
 
+      const classNames: string[] = [];
       if (
         executingLineByLine &&
         j >= interpreter.currentMemoryAddress &&
@@ -585,12 +773,21 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
             interpreter.statements[interpreter.currentLine].byteSize &&
         interpreter.statements[interpreter.currentLine].byteSize > 0
       ) {
-        byteHTML.className = 'current-memory';
+        classNames.push('current-memory');
+      }
+
+      if (
+        selectedByteRange &&
+        j >= selectedByteRange.from &&
+        j < selectedByteRange.to
+      ) {
+        classNames.push('selected-memory');
       }
 
       const byte = bytes[j];
       switch (byte.type) {
         case 'DATA':
+          classNames.push('byte-data');
           byteHTML.innerHTML =
             memoryFormat === 'hex'
               ? byte.val.toString(16).padStart(2, '0')
@@ -598,13 +795,33 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
 
           break;
 
-        case 'INSTRUCTION':
+        case 'INSTRUCTION_OPCODE':
+          classNames.push('byte-instruction-opcode');
+          byteHTML.innerHTML =
+            memoryFormat === 'hex'
+              ? byte.val.toString(16).padStart(2, '0')
+              : byte.val.toString(2).padStart(8, '0');
+          break;
+
+        case 'INSTRUCTION_OPERAND':
+          classNames.push('byte-instruction-operand');
+          byteHTML.innerHTML =
+            memoryFormat === 'hex'
+              ? byte.val.toString(16).padStart(2, '0')
+              : byte.val.toString(2).padStart(8, '0');
+          break;
+
+        case 'INSTRUCTION_UNUSED':
+          classNames.push('byte-instruction-unused');
           byteHTML.innerHTML = 'x'.repeat(width);
           break;
+
         case 'DATA_HIDDEN':
+          classNames.push('byte-data-hidden');
           byteHTML.innerHTML = '~'.repeat(width);
       }
 
+      byteHTML.className = classNames.join(' ');
       record.appendChild(byteHTML);
     }
     const numRepresntation =
@@ -615,7 +832,7 @@ const createMemoryDiv = (bytes: byte[]): Node[] => {
             bytes[i + 2],
             bytes[i + 3],
           ])
-        : 'x';
+        : '';
     const repHTML = document.createElement('div');
     repHTML.innerHTML = numRepresntation.toString();
     repHTML.className = 'rep-data';
